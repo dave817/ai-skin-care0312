@@ -9,14 +9,15 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@eslint/eslintrc": "^3.3.5",
     "@google/genai": "^1.44.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.35.1",
     "lucide-react": "^0.577.0",
-    "next": "16.1.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "next": "^15.5.12",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "recharts": "^3.8.0",
     "shaders": "^2.3.75",
     "tailwind-merge": "^3.5.0"
@@ -27,7 +28,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "^15.5.12",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
