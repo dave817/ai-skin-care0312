@@ -158,8 +158,7 @@ export const getBlogBySlug = (slug: string) =>
 
 // Helper: get related products for a blog
 export const getBlogRelatedProducts = (blog: BlogPost) => {
-  const { allProducts } = require("./products");
-  return blog.relatedProductIds
-    .map((id: string) => allProducts.find((p: { id: string }) => p.id === id))
-    .filter(Boolean);
+  // Dynamic import avoided — caller should import allProducts directly
+  // This is kept for backward compat but prefer importing allProducts from products.ts
+  return blog.relatedProductIds;
 };

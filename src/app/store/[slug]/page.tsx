@@ -12,7 +12,7 @@ import {
   Star,
   ChevronRight,
 } from "lucide-react";
-import { getProductBySlug, allProducts, Product } from "@/data/products";
+import { getProductBySlug, allProducts, type Product } from "@/data/products";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice, calcDiscount } from "@/lib/utils";
 import ProductCard from "@/components/store/ProductCard";

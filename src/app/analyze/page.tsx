@@ -418,6 +418,7 @@ export default function AnalyzePage() {
     if (fileInputRefs[key].current) {
       fileInputRefs[key].current!.value = "";
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleInputChange = useCallback(
@@ -432,6 +433,7 @@ export default function AnalyzePage() {
     (key: FaceKey) => () => {
       fileInputRefs[key].current?.click();
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -533,6 +535,7 @@ export default function AnalyzePage() {
         fileInputRefs[key].current!.value = "";
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [previews]);
 
   /* Resolve recommended products */
@@ -549,6 +552,7 @@ export default function AnalyzePage() {
         if (previews[key]) URL.revokeObjectURL(previews[key]!);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

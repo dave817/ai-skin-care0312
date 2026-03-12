@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Shader, Aurora, FilmGrain, Swirl } from "shaders/react";
+import { Shader, Aurora, FilmGrain } from "shaders/react";
 
 export default function HeroShader() {
   const [mounted, setMounted] = useState(false);
