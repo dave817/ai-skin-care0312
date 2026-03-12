@@ -23,6 +23,42 @@ import { allProducts, Product } from "@/data/products";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice, calcDiscount } from "@/lib/utils";
 
+/* ─── Image compression (keeps upload under Vercel 4.5MB limit) ── */
+
+function compressImage(file: File, maxDim = 1200, quality = 0.75): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const img = new window.Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        const ratio = Math.min(maxDim / width, maxDim / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return reject(new Error("Compression failed"));
+          resolve(new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" }));
+        },
+        "image/jpeg",
+        quality
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Failed to load image"));
+    };
+    img.src = url;
+  });
+}
+
 /* ─── Types ─────────────────────────────────────────────────── */
 
 type AnalysisState = "upload" | "analyzing" | "results";
@@ -379,7 +415,7 @@ export default function AnalyzePage() {
 
   /* File handling */
   const handleFileSelect = useCallback(
-    (key: FaceKey, file: File | null) => {
+    async (key: FaceKey, file: File | null) => {
       if (!file) return;
 
       // Validate it's an image
@@ -388,17 +424,26 @@ export default function AnalyzePage() {
         return;
       }
 
-      // Validate size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        setError("圖片大小不可超過 10MB");
+      // Validate size (max 20MB raw — will be compressed)
+      if (file.size > 20 * 1024 * 1024) {
+        setError("圖片大小不可超過 20MB");
         return;
       }
 
       setError(null);
-      setPhotos((prev) => ({ ...prev, [key]: file }));
+
+      // Compress to keep under Vercel 4.5MB body limit
+      let compressed: File;
+      try {
+        compressed = await compressImage(file, 1200, 0.75);
+      } catch {
+        compressed = file; // fallback to original if compression fails
+      }
+
+      setPhotos((prev) => ({ ...prev, [key]: compressed }));
 
       // Create preview URL
-      const url = URL.createObjectURL(file);
+      const url = URL.createObjectURL(compressed);
       setPreviews((prev) => {
         // Revoke previous URL to prevent memory leaks
         if (prev[key]) URL.revokeObjectURL(prev[key]!);
