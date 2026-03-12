@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
-const GEMINI_API_KEY = "AIzaSyD09WP_BPumOwY_nEVPOgjFhpHDDaiqo6I";
-
-const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_GEMINI_API_KEY! });
 
 const ANALYSIS_PROMPT = `你是一位專業的皮膚科顧問。請分析以下面部照片，提供詳細的膚質分析報告。
 
