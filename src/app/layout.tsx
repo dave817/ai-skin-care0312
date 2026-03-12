@@ -6,6 +6,7 @@ import {
   Noto_Serif_TC,
   Space_Mono,
 } from "next/font/google";
+import { CartProvider } from "@/lib/cart-context";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import GlobalEffects from "@/components/layout/GlobalEffects";
@@ -46,13 +47,22 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "璞肌 Pure Skin | AI 智能護膚分析與產品推薦",
+  title: "Dear Glow Beauty | 日韓化妝品護膚品專門店",
   description:
-    "上傳照片，即刻獲得 AI 專業膚質分析，配合精選護膚產品推薦，讓你的護膚程序不再盲目。香港本地順豐送貨。",
-  keywords: ["護膚", "AI膚質分析", "skincare", "香港", "護膚品推薦"],
+    "日韓化妝品護膚品專門店，直送香港。AI智能膚質分析，個人化產品推薦，滿HK$160免運費。探索最新日韓護膚趨勢，找到最適合你的護膚方案。",
+  keywords: [
+    "韓國美妝",
+    "韓國護膚",
+    "K-beauty",
+    "香港",
+    "AI膚質分析",
+    "護膚品推薦",
+    "韓國護膚品直送",
+  ],
   openGraph: {
-    title: "璞肌 Pure Skin | AI 智能護膚分析",
-    description: "AI 驅動的個人化護膚方案 — 專為香港市場而設",
+    title: "Dear Glow Beauty | 日韓化妝品護膚品專門店",
+    description:
+      "日韓化妝品護膚品專門店，直送香港。AI智能膚質分析，個人化產品推薦，滿HK$160免運費。",
     locale: "zh_HK",
     type: "website",
   },
@@ -68,10 +78,12 @@ export default function RootLayout({
       <body
         className={`${cormorant.variable} ${outfit.variable} ${notoSansTC.variable} ${notoSerifTC.variable} ${spaceMono.variable} antialiased`}
       >
-        <GlobalEffects />
-        <Navbar />
-        <main className="relative z-10 min-h-screen">{children}</main>
-        <Footer />
+        <CartProvider>
+          <GlobalEffects />
+          <Navbar />
+          <main className="relative z-10 min-h-screen">{children}</main>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );
