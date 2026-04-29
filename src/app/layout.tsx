@@ -1,50 +1,33 @@
 import type { Metadata } from "next";
-import {
-  Cormorant_Garamond,
-  Outfit,
-  Noto_Sans_TC,
-  Noto_Serif_TC,
-  Space_Mono,
-} from "next/font/google";
 import { CartProvider } from "@/lib/cart-context";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import GlobalEffects from "@/components/layout/GlobalEffects";
+import ChatFab from "@/components/chat/ChatFab";
+
+/* Self-hosted fonts (no Google Fonts network fetch at build time) */
+import "@fontsource/cormorant-garamond/400.css";
+import "@fontsource/cormorant-garamond/500.css";
+import "@fontsource/cormorant-garamond/600.css";
+import "@fontsource/cormorant-garamond/700.css";
+import "@fontsource/outfit/300.css";
+import "@fontsource/outfit/400.css";
+import "@fontsource/outfit/500.css";
+import "@fontsource/outfit/600.css";
+import "@fontsource/outfit/700.css";
+import "@fontsource/noto-sans-tc/300.css";
+import "@fontsource/noto-sans-tc/400.css";
+import "@fontsource/noto-sans-tc/500.css";
+import "@fontsource/noto-sans-tc/600.css";
+import "@fontsource/noto-sans-tc/700.css";
+import "@fontsource/noto-serif-tc/400.css";
+import "@fontsource/noto-serif-tc/500.css";
+import "@fontsource/noto-serif-tc/600.css";
+import "@fontsource/noto-serif-tc/700.css";
+import "@fontsource/space-mono/400.css";
+import "@fontsource/space-mono/700.css";
+
 import "./globals.css";
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-cormorant",
-  display: "swap",
-});
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  variable: "--font-outfit",
-  display: "swap",
-});
-
-const notoSansTC = Noto_Sans_TC({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-noto-sans-tc",
-  display: "swap",
-});
-
-const notoSerifTC = Noto_Serif_TC({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-noto-serif-tc",
-  display: "swap",
-});
-
-const spaceMono = Space_Mono({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-space-mono",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Dear Glow Beauty | 日韓化妝品護膚品專門店",
@@ -68,6 +51,16 @@ export const metadata: Metadata = {
   },
 };
 
+const fontVariables: React.CSSProperties = {
+  ["--font-cormorant" as string]: '"Cormorant Garamond", Georgia, serif',
+  ["--font-outfit" as string]: '"Outfit", system-ui, -apple-system, sans-serif',
+  ["--font-noto-sans-tc" as string]:
+    '"Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif',
+  ["--font-noto-serif-tc" as string]:
+    '"Noto Serif TC", "Songti TC", "PMingLiU", serif',
+  ["--font-space-mono" as string]: '"Space Mono", "Courier New", monospace',
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -75,14 +68,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-Hant">
-      <body
-        className={`${cormorant.variable} ${outfit.variable} ${notoSansTC.variable} ${notoSerifTC.variable} ${spaceMono.variable} antialiased`}
-      >
+      <body className="antialiased" style={fontVariables}>
         <CartProvider>
           <GlobalEffects />
           <Navbar />
           <main className="relative z-10 min-h-screen">{children}</main>
           <Footer />
+          <ChatFab />
         </CartProvider>
       </body>
     </html>

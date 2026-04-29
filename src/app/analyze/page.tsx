@@ -22,6 +22,7 @@ import {
 import { allProducts, Product } from "@/data/products";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice, calcDiscount } from "@/lib/utils";
+import { getOrCreateDeviceId } from "@/lib/device-id";
 
 /* ─── Image compression (keeps upload under Vercel 4.5MB limit) ── */
 
@@ -68,6 +69,20 @@ interface SkinConcern {
   score: number;
   level: string;
   description: string;
+  detailedExplanation?: string;
+  recommendedProductIds?: string[];
+}
+
+interface RoutineStep {
+  step: string;
+  productIds: string[];
+}
+
+interface QuotaInfo {
+  remaining: number;
+  limit: number;
+  resetAt: string;
+  bypassed?: boolean;
 }
 
 interface AnalysisResult {
@@ -75,10 +90,20 @@ interface AnalysisResult {
   skinType: string;
   concerns: SkinConcern[];
   summary: string;
-  morningRoutine: string[];
-  nightRoutine: string[];
-  recommendedProductIds: string[];
+  morningRoutine: RoutineStep[];
+  nightRoutine: RoutineStep[];
   warnings: string[];
+  quota?: QuotaInfo;
+}
+
+function findProduct(id: string): Product | null {
+  const p = allProducts.find((p) => p.id === id);
+  return p && p.active ? p : null;
+}
+
+function resolveProducts(ids: string[] | undefined): Product[] {
+  if (!ids?.length) return [];
+  return ids.map(findProduct).filter((p): p is Product => p !== null);
 }
 
 type FaceKey = "front" | "left" | "right";
@@ -267,6 +292,138 @@ function ConcernBar({
         {concern.description}
       </p>
     </motion.div>
+  );
+}
+
+/* ─── Concern Detail Section (with explanation + product recs) ─ */
+
+function ConcernDetail({
+  concern,
+  index,
+}: {
+  concern: SkinConcern;
+  index: number;
+}) {
+  const products = resolveProducts(concern.recommendedProductIds);
+  const color = scoreColor(concern.score);
+  const hasExtras =
+    (concern.detailedExplanation && concern.detailedExplanation.length > 0) ||
+    products.length > 0;
+  if (!hasExtras) return null;
+
+  return (
+    <motion.div
+      className="rounded-2xl border border-border bg-bg-primary overflow-hidden mb-6"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.05 * index + 0.4 }}
+    >
+      {/* Header strip */}
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
+        <span
+          className="font-mono text-xs font-bold px-2 py-1 rounded"
+          style={{ backgroundColor: `${color}1a`, color }}
+        >
+          {concern.score}
+        </span>
+        <h3 className="text-base font-semibold text-text-primary">
+          {concern.name}
+        </h3>
+        <span
+          className={`ml-auto text-[11px] font-semibold px-2.5 py-1 rounded-full ${levelBadgeStyle(
+            concern.level
+          )}`}
+        >
+          {concern.level}
+        </span>
+      </div>
+
+      {/* Explanation */}
+      {concern.detailedExplanation && (
+        <div className="px-5 pt-4 pb-2">
+          <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
+            {concern.detailedExplanation}
+          </p>
+        </div>
+      )}
+
+      {/* Recommended products */}
+      {products.length > 0 && (
+        <div className="px-5 pb-5 pt-3">
+          <p className="text-xs font-semibold text-text-muted tracking-wider uppercase mb-3">
+            針對「{concern.name}」嘅推薦
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {products.map((product, i) => (
+              <RecommendedProductCard
+                key={product.id}
+                product={product}
+                index={i}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+/* ─── Routine Step with Products ───────────────────────────── */
+
+function RoutineStepRow({
+  step,
+  index,
+  accent,
+}: {
+  step: RoutineStep;
+  index: number;
+  accent: { bg: string; fg: string };
+}) {
+  const products = resolveProducts(step.productIds);
+
+  return (
+    <motion.li
+      className="flex flex-col gap-2.5"
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: 0.8 + index * 0.06 }}
+    >
+      <div className="flex items-start gap-3">
+        <span
+          className="flex-shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center mt-0.5"
+          style={{ backgroundColor: accent.bg, color: accent.fg }}
+        >
+          {index + 1}
+        </span>
+        <span className="text-sm text-text-primary leading-relaxed font-medium">
+          {step.step}
+        </span>
+      </div>
+      {products.length > 0 && (
+        <div className="ml-9 flex flex-wrap gap-2">
+          {products.map((p) => (
+            <Link
+              key={p.id}
+              href={`/store/${p.slug}`}
+              className="inline-flex items-center gap-2 bg-white border border-border rounded-full pl-1 pr-3 py-1 hover:border-accent-blue transition-colors group"
+            >
+              <span className="relative w-7 h-7 rounded-full overflow-hidden bg-bg-secondary flex-shrink-0">
+                <Image
+                  src={p.imageUrl}
+                  alt={p.imageAlt}
+                  fill
+                  className="object-cover"
+                  sizes="28px"
+                />
+              </span>
+              <span className="text-[11px] font-medium text-text-secondary group-hover:text-accent-blue line-clamp-1 max-w-[140px]">
+                {p.brand}・{p.nameZh}
+              </span>
+            </Link>
+          ))}
+        </div>
+      )}
+    </motion.li>
   );
 }
 
@@ -512,6 +669,7 @@ export default function AnalyzePage() {
 
     try {
       const formData = new FormData();
+      formData.append("deviceId", getOrCreateDeviceId());
 
       for (const key of faceOrder) {
         if (photos[key]) {
@@ -524,25 +682,31 @@ export default function AnalyzePage() {
         body: formData,
       });
 
+      const data = await res.json().catch(() => null);
+
       if (!res.ok) {
-        const data = await res.json().catch(() => null);
+        if (res.status === 429 && data?.quota?.resetAt) {
+          const resetDate = new Date(data.quota.resetAt);
+          throw new Error(
+            data.error ||
+              `今日分析次數已用完（${resetDate.toLocaleString("zh-HK")} 後重置）`
+          );
+        }
         throw new Error(
           data?.error || `分析失敗 (HTTP ${res.status})，請重試`
         );
       }
 
-      const data: AnalysisResult = await res.json();
-
       // Validate required fields
       if (
-        typeof data.overallScore !== "number" ||
-        !data.skinType ||
-        !Array.isArray(data.concerns)
+        typeof data?.overallScore !== "number" ||
+        !data?.skinType ||
+        !Array.isArray(data?.concerns)
       ) {
         throw new Error("AI 分析結果格式不正確，請重試");
       }
 
-      setResult(data);
+      setResult(data as AnalysisResult);
       setState("results");
     } catch (err: unknown) {
       console.error("Analysis error:", err);
@@ -583,11 +747,25 @@ export default function AnalyzePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [previews]);
 
-  /* Resolve recommended products */
-  const recommendedProducts: Product[] = result
-    ? result.recommendedProductIds
-        .map((id) => allProducts.find((p) => p.id === id))
-        .filter((p): p is Product => p !== undefined && p.active)
+  /* Aggregate all recommended products from concerns + routines (deduped) */
+  const allRecommendedProducts: Product[] = result
+    ? (() => {
+        const seen = new Set<string>();
+        const out: Product[] = [];
+        const collect = (ids: string[] | undefined) => {
+          if (!ids) return;
+          for (const id of ids) {
+            if (seen.has(id)) continue;
+            seen.add(id);
+            const p = findProduct(id);
+            if (p) out.push(p);
+          }
+        };
+        result.concerns.forEach((c) => collect(c.recommendedProductIds));
+        result.morningRoutine.forEach((s) => collect(s.productIds));
+        result.nightRoutine.forEach((s) => collect(s.productIds));
+        return out;
+      })()
     : [];
 
   /* Cleanup preview URLs on unmount */
@@ -953,6 +1131,12 @@ export default function AnalyzePage() {
               <p className="text-text-muted text-sm">
                 以下是根據您的面部照片生成的 AI 分析結果
               </p>
+              {result.quota && !result.quota.bypassed && (
+                <div className="mt-4 inline-flex items-center gap-2 bg-bg-secondary text-text-secondary px-3 py-1.5 rounded-full text-xs font-medium">
+                  <Info className="w-3.5 h-3.5" />
+                  今日剩餘 {result.quota.remaining}/{result.quota.limit} 次分析
+                </div>
+              )}
             </motion.div>
 
             {/* Score & Skin Type */}
@@ -998,8 +1182,8 @@ export default function AnalyzePage() {
               </div>
             </motion.div>
 
-            {/* Concerns Grid */}
-            <div className="max-w-4xl mx-auto mb-16">
+            {/* Concerns Grid (compact metrics) */}
+            <div className="max-w-4xl mx-auto mb-12">
               <motion.h2
                 className="text-lg md:text-xl font-bold text-text-primary mb-6"
                 initial={{ opacity: 0, y: 15 }}
@@ -1014,6 +1198,36 @@ export default function AnalyzePage() {
                 ))}
               </div>
             </div>
+
+            {/* Per-Concern Detailed Analysis + Product Recommendations */}
+            {result.concerns.some(
+              (c) =>
+                (c.detailedExplanation && c.detailedExplanation.length > 0) ||
+                (c.recommendedProductIds && c.recommendedProductIds.length > 0)
+            ) && (
+              <div className="max-w-4xl mx-auto mb-16">
+                <motion.div
+                  className="flex items-center gap-2.5 mb-6"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.45 }}
+                >
+                  <Sparkles className="w-5 h-5 text-accent-blue" />
+                  <h2 className="text-lg md:text-xl font-bold text-text-primary">
+                    深入分析及對症推薦
+                  </h2>
+                </motion.div>
+                <div>
+                  {result.concerns.map((concern, i) => (
+                    <ConcernDetail
+                      key={`detail-${concern.name}`}
+                      concern={concern}
+                      index={i}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Skincare Routines */}
             <div className="max-w-4xl mx-auto mb-16">
@@ -1042,22 +1256,14 @@ export default function AnalyzePage() {
                       早晨護膚程序
                     </h3>
                   </div>
-                  <ol className="space-y-3">
+                  <ol className="space-y-4">
                     {result.morningRoutine.map((step, i) => (
-                      <motion.li
-                        key={i}
-                        className="flex items-start gap-3"
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.8 + i * 0.08 }}
-                      >
-                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#FFF3E0] text-[#F57C00] text-xs font-bold flex items-center justify-center mt-0.5">
-                          {i + 1}
-                        </span>
-                        <span className="text-sm text-text-secondary leading-relaxed">
-                          {step}
-                        </span>
-                      </motion.li>
+                      <RoutineStepRow
+                        key={`morning-${i}`}
+                        step={step}
+                        index={i}
+                        accent={{ bg: "#FFF3E0", fg: "#F57C00" }}
+                      />
                     ))}
                   </ol>
                 </motion.div>
@@ -1077,30 +1283,22 @@ export default function AnalyzePage() {
                       晚間護膚程序
                     </h3>
                   </div>
-                  <ol className="space-y-3">
+                  <ol className="space-y-4">
                     {result.nightRoutine.map((step, i) => (
-                      <motion.li
-                        key={i}
-                        className="flex items-start gap-3"
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.8 + i * 0.08 }}
-                      >
-                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#E8EAF6] text-[#5C6BC0] text-xs font-bold flex items-center justify-center mt-0.5">
-                          {i + 1}
-                        </span>
-                        <span className="text-sm text-text-secondary leading-relaxed">
-                          {step}
-                        </span>
-                      </motion.li>
+                      <RoutineStepRow
+                        key={`night-${i}`}
+                        step={step}
+                        index={i}
+                        accent={{ bg: "#E8EAF6", fg: "#5C6BC0" }}
+                      />
                     ))}
                   </ol>
                 </motion.div>
               </div>
             </div>
 
-            {/* Recommended Products */}
-            {recommendedProducts.length > 0 && (
+            {/* All Recommended Products (deduped from concerns + routines) */}
+            {allRecommendedProducts.length > 0 && (
               <div className="max-w-5xl mx-auto mb-16">
                 <motion.div
                   className="flex items-center justify-between mb-6"
@@ -1109,7 +1307,7 @@ export default function AnalyzePage() {
                   transition={{ delay: 0.9 }}
                 >
                   <h2 className="text-lg md:text-xl font-bold text-text-primary">
-                    推薦商品
+                    全部推薦商品
                   </h2>
                   <Link
                     href="/store"
@@ -1121,7 +1319,7 @@ export default function AnalyzePage() {
                 </motion.div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {recommendedProducts.map((product, i) => (
+                  {allRecommendedProducts.map((product, i) => (
                     <RecommendedProductCard
                       key={product.id}
                       product={product}

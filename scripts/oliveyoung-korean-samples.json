@@ -1,0 +1,74 @@
+{
+  "scrapedAt": "2026-04-29",
+  "source": "https://www.oliveyoung.co.kr",
+  "method": "Firecrawl MCP firecrawl_scrape with json extraction",
+  "note": "Each entry contains the array of long Korean description images embedded in the product detail tab. Run each through /api/translate-image to generate Traditional Chinese versions, then save URLs as descriptionImagesZh on the matching Product.",
+  "samples": [
+    {
+      "productId": "P001",
+      "matchedTo": "ANUA Heartleaf 77 + B3Zinc Soothing Serum",
+      "oliveYoungUrl": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000243621",
+      "productNameKr": "아누아 어성초 77 히알루론 수분 진정 토너 250ml 더블 기획",
+      "descriptionImagesKr": [
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop0/image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/attached/2025/12/31/35c_31175320.png?created=202602261517",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop2/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_1.png?created=202602261517",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop3/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_2.png?created=202602261517",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop0/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_3.png?created=202602261517",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop1/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_4.png?created=202602261517",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop2/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_5.gif?created=202602261517",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop0/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_6.png?created=202602261517",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop1/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_7_2.png?created=202602261517",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop0/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_8.png?created=202602261517",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop1/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_9.png?created=202602261517"
+      ]
+    },
+    {
+      "productId": "P002",
+      "matchedTo": "Torriden DIVE-IN Multi Pad",
+      "oliveYoungUrl": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000170266",
+      "productNameKr": "토리든 다이브인 저분자 히알루론산 토너",
+      "descriptionImagesKr": [
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/01.jpg?created=202601112304",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/03-1.jpg?created=202601112304",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/03-2.jpg?created=202601112304",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/04.jpg?created=202601112304",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/05.jpg?created=202601112304",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/07.jpg?created=202601112304",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/08-1.jpg?created=202601112304",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/09.jpg?created=202601112304",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/10-2.jpg?created=202601112304",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/12.jpg?created=202601112304",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/18.jpg?created=202601112304",
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/20.jpg?created=202601112304"
+      ]
+    },
+    {
+      "productId": "P003",
+      "matchedTo": "Round Lab Vita Niacinamide Dark Spot Serum",
+      "oliveYoungUrl": "https://www.oliveyoung.co.kr/store/goods/getGoodsDetail.do?goodsNo=A000000204169",
+      "productNameKr": "라운드랩 비타 나이아신 잡티 세럼",
+      "descriptionImagesKr": [
+        "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000204169/202604281605/crop0/ai.esmplus.com/roundlab/OY/LOCAL/V/LS_V/LS_V_01_.jpg?created=202604281605"
+      ]
+    }
+  ],
+  "remainingProductsToScrape": [
+    "P004 Round Lab Pine Calming CICA Sunscreen",
+    "P005 numbuzin No.3 Rice Enzyme Cleansing Foam",
+    "P006 Wellage Real Hyaluronic Blue Ampoule",
+    "P007 isntree Ultra-Low Molecular HA Serum",
+    "P008 beplain Mung Bean Cleansing Foam",
+    "P009 Medicube Deep Vita C Pad",
+    "P010 ANUA Heartleaf Quercetinol Cleansing Foam",
+    "P011 DEWYTREE AC Deep Calming Mask",
+    "P012 Sungboon Editor Brightening Mask",
+    "P013 CKD Retino Collagen Cream",
+    "P014 Torriden DIVE-IN Cleansing Water",
+    "P015 Cosnori Avocado Eye Cream",
+    "P016 Some By Mi BYE BYE BLACKHEAD",
+    "P017 About Tone Sun Serum Base",
+    "P018 CKD Green Propolis Sun",
+    "P019 Sungboon Editor Green Tomato Ampoule",
+    "and more..."
+  ]
+}

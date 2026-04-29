@@ -8,7 +8,7 @@
   --bg-warm: #F5F0EB;
   --text-primary: #1A1A1A;
   --text-secondary: #555555;
-  --text-muted: #999999;
+  --text-muted: #6B6B6B;
   --accent-blue: #4A9FE5;
   --accent-blue-dark: #3A8BD4;
   --accent-rose: #C17C6A;
@@ -361,4 +361,35 @@ p {
   position: absolute;
   inset: 0;
   z-index: 0;
+}
+
+/* ===== Admin Form Input ===== */
+.form-input {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  background-color: white;
+  border: 1px solid var(--border, #E5E5E5);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: var(--text-primary, #1A1A1A);
+  font-family: inherit;
+  transition: border-color 0.15s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent-rose, #C17C6A);
+}
+
+.form-input:disabled {
+  background-color: #F7F7F7;
+  color: #999;
+  cursor: not-allowed;
+}
+
+textarea.form-input {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.6;
 }
