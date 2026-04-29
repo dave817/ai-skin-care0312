@@ -8,20 +8,31 @@ let chatLimiter: Ratelimit | null = null;
 let translateLimiter: Ratelimit | null = null;
 let loginLimiter: Ratelimit | null = null;
 
+function cleanEnv(name: string): string | undefined {
+  const v = process.env[name];
+  if (!v) return undefined;
+  const cleaned = v.replace(/\s+/g, "");
+  return cleaned.length > 0 ? cleaned : undefined;
+}
+
 function makeLimiter(
   prefix: string,
   count: number,
   window: "10 s" | "1 m" | "15 m" | "1 h"
 ): Ratelimit | null {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const url = cleanEnv("UPSTASH_REDIS_REST_URL");
+  const token = cleanEnv("UPSTASH_REDIS_REST_TOKEN");
   if (!url || !token) return null;
-  return new Ratelimit({
-    redis: new Redis({ url, token }),
-    limiter: Ratelimit.slidingWindow(count, window),
-    analytics: true,
-    prefix,
-  });
+  try {
+    return new Ratelimit({
+      redis: new Redis({ url, token }),
+      limiter: Ratelimit.slidingWindow(count, window),
+      analytics: true,
+      prefix,
+    });
+  } catch {
+    return null;
+  }
 }
 
 function getChatLimiter(): Ratelimit | null {
@@ -79,18 +90,22 @@ let ratelimit: Ratelimit | null = null;
 function getRatelimit(): Ratelimit | null {
   if (ratelimit) return ratelimit;
 
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const url = cleanEnv("UPSTASH_REDIS_REST_URL");
+  const token = cleanEnv("UPSTASH_REDIS_REST_TOKEN");
   if (!url || !token) return null;
 
-  const redis = new Redis({ url, token });
-  ratelimit = new Ratelimit({
-    redis,
-    limiter: Ratelimit.fixedWindow(SKIN_ANALYSIS_DAILY_QUOTA, "1 d"),
-    analytics: true,
-    prefix: "dgb:skin",
-  });
-  return ratelimit;
+  try {
+    const redis = new Redis({ url, token });
+    ratelimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.fixedWindow(SKIN_ANALYSIS_DAILY_QUOTA, "1 d"),
+      analytics: true,
+      prefix: "dgb:skin",
+    });
+    return ratelimit;
+  } catch {
+    return null;
+  }
 }
 
 function safeStringEqual(a: string, b: string): boolean {

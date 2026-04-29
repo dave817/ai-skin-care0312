@@ -17,32 +17,41 @@ function keyOf(id: string): string {
   return `${PRODUCT_KEY_PREFIX}${id}`;
 }
 
+function seedFallback(): ProductWithMeta[] {
+  return seedProducts.map((p) => withMeta(p, 0));
+}
+
 export async function listProducts(): Promise<ProductWithMeta[]> {
   const redis = getRedis();
-  if (!redis) {
-    /* fallback: seed data */
-    return seedProducts.map((p) => withMeta(p, 0));
+  if (!redis) return seedFallback();
+  try {
+    const ids = await redis.smembers<string[]>(PRODUCT_INDEX_KEY);
+    if (!ids || ids.length === 0) return seedFallback();
+    const pipe = redis.pipeline();
+    for (const id of ids) pipe.get(keyOf(id));
+    const rows = await pipe.exec<(ProductWithMeta | null)[]>();
+    return rows.filter((r): r is ProductWithMeta => r !== null);
+  } catch (err) {
+    console.warn("[products-repo] Redis read failed, using seed:", err);
+    return seedFallback();
   }
-  const ids = await redis.smembers<string[]>(PRODUCT_INDEX_KEY);
-  if (!ids || ids.length === 0) {
-    return seedProducts.map((p) => withMeta(p, 0));
-  }
-  const pipe = redis.pipeline();
-  for (const id of ids) pipe.get(keyOf(id));
-  const rows = await pipe.exec<(ProductWithMeta | null)[]>();
-  return rows.filter((r): r is ProductWithMeta => r !== null);
 }
 
 export async function getProduct(id: string): Promise<ProductWithMeta | null> {
   const redis = getRedis();
-  if (!redis) {
-    const found = seedProducts.find((p) => p.id === id);
-    return found ? withMeta(found, 0) : null;
+  const seedHit = () => {
+    const seed = seedProducts.find((p) => p.id === id);
+    return seed ? withMeta(seed, 0) : null;
+  };
+  if (!redis) return seedHit();
+  try {
+    const product = await redis.get<ProductWithMeta>(keyOf(id));
+    if (product) return product;
+    return seedHit();
+  } catch (err) {
+    console.warn("[products-repo] Redis get failed, using seed:", err);
+    return seedHit();
   }
-  const product = await redis.get<ProductWithMeta>(keyOf(id));
-  if (product) return product;
-  const seed = seedProducts.find((p) => p.id === id);
-  return seed ? withMeta(seed, 0) : null;
 }
 
 export async function getProductBySlug(

@@ -17,32 +17,42 @@ function keyOf(id: string): string {
   return `${BLOG_KEY_PREFIX}${id}`;
 }
 
+function seedFallback(): BlogWithMeta[] {
+  return seedBlogs.map((b) => withMeta(b, 0));
+}
+
 export async function listBlogs(): Promise<BlogWithMeta[]> {
   const redis = getRedis();
-  if (!redis) {
-    return seedBlogs.map((b) => withMeta(b, 0));
+  if (!redis) return seedFallback();
+  try {
+    const ids = await redis.smembers<string[]>(BLOG_INDEX_KEY);
+    if (!ids || ids.length === 0) return seedFallback();
+    const pipe = redis.pipeline();
+    for (const id of ids) pipe.get(keyOf(id));
+    const rows = await pipe.exec<(BlogWithMeta | null)[]>();
+    const valid = rows.filter((r): r is BlogWithMeta => r !== null);
+    return valid.sort((a, b) => (b.date > a.date ? 1 : -1));
+  } catch (err) {
+    console.warn("[blogs-repo] Redis read failed, using seed:", err);
+    return seedFallback();
   }
-  const ids = await redis.smembers<string[]>(BLOG_INDEX_KEY);
-  if (!ids || ids.length === 0) {
-    return seedBlogs.map((b) => withMeta(b, 0));
-  }
-  const pipe = redis.pipeline();
-  for (const id of ids) pipe.get(keyOf(id));
-  const rows = await pipe.exec<(BlogWithMeta | null)[]>();
-  const valid = rows.filter((r): r is BlogWithMeta => r !== null);
-  return valid.sort((a, b) => (b.date > a.date ? 1 : -1));
 }
 
 export async function getBlog(id: string): Promise<BlogWithMeta | null> {
   const redis = getRedis();
-  if (!redis) {
+  const seedHit = () => {
     const found = seedBlogs.find((b) => b.id === id);
     return found ? withMeta(found, 0) : null;
+  };
+  if (!redis) return seedHit();
+  try {
+    const blog = await redis.get<BlogWithMeta>(keyOf(id));
+    if (blog) return blog;
+    return seedHit();
+  } catch (err) {
+    console.warn("[blogs-repo] Redis get failed, using seed:", err);
+    return seedHit();
   }
-  const blog = await redis.get<BlogWithMeta>(keyOf(id));
-  if (blog) return blog;
-  const seed = seedBlogs.find((b) => b.id === id);
-  return seed ? withMeta(seed, 0) : null;
 }
 
 export async function getBlogBySlug(slug: string): Promise<BlogWithMeta | null> {
