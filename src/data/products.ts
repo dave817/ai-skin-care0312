@@ -1,11 +1,11 @@
 /**
- * Product catalog seed data.
- * Source: ohmyglow.co (scraped 2026-04-29 via Firecrawl).
- * On first admin load, seed → Upstash Redis via `匯入種子資料` button.
+ * Product catalog seed data — 154 products.
+ * Source: ohmyglow.co (scraped 2026-04-29 via Firecrawl MCP, ~2400 products mapped, ~150 sampled).
+ * On first admin load, click "匯入種子資料" to seed → Upstash Redis.
  *
  * Optional fields:
- *   descriptionImageKr — long Korean description image URL (e.g. from oliveyoung.co.kr)
- *   descriptionImageZh — AI-translated Traditional Chinese version (rendered via /api/translate-image)
+ *   descriptionImagesKr — long Korean description images from oliveyoung.co.kr
+ *   descriptionImagesZh — AI-translated PNGs (1:1 with Kr) — generate via /admin/translate
  */
 
 export interface Product {
@@ -29,9 +29,6 @@ export interface Product {
   volume: string;
   stock: number;
   active: boolean;
-  /* Optional Korean → Traditional Chinese long description images
-     descriptionImagesKr: scraped from oliveyoung.co.kr (long detail bar images)
-     descriptionImagesZh: AI-translated PNGs via /api/translate-image (1:1 with Kr) */
   descriptionImagesKr?: string[];
   descriptionImagesZh?: string[];
 }
@@ -44,111 +41,62 @@ export type Category = {
 };
 
 export const mainCategories: Category[] = [
-  {
-    id: "skincare",
-    labelZh: "護膚",
-    icon: "🧴",
-    subcategories: [
-      { id: "all", labelZh: "全部" },
-      { id: "toner", labelZh: "化妝水" },
-      { id: "serum", labelZh: "精華液" },
-      { id: "cream", labelZh: "乳液 / 乳霜" },
-      { id: "mask", labelZh: "面膜" },
-      { id: "mist", labelZh: "噴霧 / 精油" },
-      { id: "cleanser", labelZh: "臉部清潔" },
-      { id: "eye-care", labelZh: "眼霜" },
-      { id: "sunscreen", labelZh: "防曬護理" },
-      { id: "lip-care", labelZh: "唇部護理" },
-    ],
-  },
-  {
-    id: "body-hair",
-    labelZh: "身體 & 頭髮",
-    icon: "💆",
-    subcategories: [
-      { id: "all", labelZh: "全部" },
-      { id: "hair-care", labelZh: "頭髮護理" },
-      { id: "hair-styling", labelZh: "造型定型" },
-      { id: "body-care", labelZh: "身體護理" },
-    ],
-  },
-  {
-    id: "makeup",
-    labelZh: "彩妝",
-    icon: "💄",
-    subcategories: [
-      { id: "all", labelZh: "全部" },
-      { id: "lip", labelZh: "唇部彩妝" },
-      { id: "eye-brow", labelZh: "眼眉彩妝" },
-      { id: "face", labelZh: "臉部彩妝" },
-    ],
-  },
-  {
-    id: "tools",
-    labelZh: "美容工具",
-    icon: "🪥",
-    subcategories: [
-      { id: "all", labelZh: "全部" },
-      { id: "brushes", labelZh: "刷具" },
-      { id: "puffs", labelZh: "粉撲" },
-    ],
-  },
+  { id: "skincare", labelZh: "護膚", icon: "🧴", subcategories: [
+    { id: "all", labelZh: "全部" },
+    { id: "toner", labelZh: "化妝水" },
+    { id: "serum", labelZh: "精華液" },
+    { id: "cream", labelZh: "乳液 / 乳霜" },
+    { id: "mask", labelZh: "面膜" },
+    { id: "mist", labelZh: "噴霧 / 精油" },
+    { id: "cleanser", labelZh: "臉部清潔" },
+    { id: "eye-care", labelZh: "眼霜" },
+    { id: "sunscreen", labelZh: "防曬護理" },
+    { id: "lip-care", labelZh: "唇部護理" },
+  ]},
+  { id: "body-hair", labelZh: "身體 & 頭髮", icon: "💆", subcategories: [
+    { id: "all", labelZh: "全部" },
+    { id: "hair-care", labelZh: "頭髮護理" },
+    { id: "hair-styling", labelZh: "造型定型" },
+    { id: "body-care", labelZh: "身體護理" },
+  ]},
+  { id: "makeup", labelZh: "彩妝", icon: "💄", subcategories: [
+    { id: "all", labelZh: "全部" },
+    { id: "lip", labelZh: "唇部彩妝" },
+    { id: "eye-brow", labelZh: "眼眉彩妝" },
+    { id: "face", labelZh: "臉部彩妝" },
+  ]},
+  { id: "tools", labelZh: "美容工具", icon: "🪥", subcategories: [
+    { id: "all", labelZh: "全部" },
+    { id: "brushes", labelZh: "刷具" },
+    { id: "puffs", labelZh: "粉撲" },
+  ]},
   { id: "food", labelZh: "食品", icon: "🍵" },
   { id: "home", labelZh: "居家生活", icon: "🏠" },
   { id: "health", labelZh: "健康", icon: "💊" },
 ];
 
-function p(
-  id: string,
-  brand: string,
-  nameZh: string,
-  nameEn: string,
-  slug: string,
-  category: string,
-  subcategory: string,
-  priceOriginal: number,
-  priceSale: number | null,
-  imageUrl: string,
-  descriptionZh: string,
-  tags: string[],
-  skinConcerns: string[],
-  volume: string,
-  rating: number,
-  reviewCount: number,
-  stock = 50,
-  descriptionImagesKr?: string[]
-): Product {
+interface PArgs {
+  id: string; brand: string; nameZh: string; nameEn: string; slug: string;
+  category: string; subcategory: string; priceOriginal: number; priceSale: number | null;
+  imageUrl: string; descriptionZh: string; tags: string[]; skinConcerns: string[];
+  volume: string; rating?: number; reviewCount?: number; stock?: number; krImages?: string[];
+}
+
+function p(a: PArgs): Product {
   return {
-    id,
-    slug,
-    brand,
-    nameZh,
-    nameEn,
-    category,
-    subcategory,
-    priceOriginal,
-    priceSale,
-    currency: "HKD",
-    descriptionZh,
-    imageUrl,
-    imageAlt: `${brand} ${nameZh}`,
-    tags,
-    skinConcerns,
-    rating,
-    reviewCount,
-    volume,
-    stock,
-    active: true,
-    ...(descriptionImagesKr ? { descriptionImagesKr } : {}),
+    id: a.id, slug: a.slug, brand: a.brand, nameZh: a.nameZh, nameEn: a.nameEn,
+    category: a.category, subcategory: a.subcategory,
+    priceOriginal: a.priceOriginal, priceSale: a.priceSale, currency: "HKD",
+    descriptionZh: a.descriptionZh, imageUrl: a.imageUrl, imageAlt: `${a.brand} ${a.nameZh}`,
+    tags: a.tags, skinConcerns: a.skinConcerns,
+    rating: a.rating ?? 4.6, reviewCount: a.reviewCount ?? 100,
+    volume: a.volume, stock: a.stock ?? 50, active: true,
+    ...(a.krImages ? { descriptionImagesKr: a.krImages } : {}),
   };
 }
 
-/* OliveYoung Korean long-description image URLs (scraped 2026-04-29 via Firecrawl MCP).
-   Run each through /admin/translate or /api/translate-image to generate
-   descriptionImagesZh PNGs, then add the URLs to the matching product.
-   Source: https://www.oliveyoung.co.kr */
-
-const KR_IMG_P001_ANUA_HEARTLEAF_77 = [
+/* OliveYoung Korean detail images for top products */
+const KR_P001 = [
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop2/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_1.png?created=202602261517",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop3/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_2.png?created=202602261517",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop0/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_3.png?created=202602261517",
@@ -158,267 +106,222 @@ const KR_IMG_P001_ANUA_HEARTLEAF_77 = [
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop0/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_8.png?created=202602261517",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop1/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_9.png?created=202602261517",
 ];
-
-const KR_IMG_P002_TORRIDEN_DIVE_IN = [
+const KR_P002 = [
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/01.jpg?created=202601112304",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/03-1.jpg?created=202601112304",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/04.jpg?created=202601112304",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/05.jpg?created=202601112304",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/07.jpg?created=202601112304",
-  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/08-1.jpg?created=202601112304",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/09.jpg?created=202601112304",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/12.jpg?created=202601112304",
-  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/18.jpg?created=202601112304",
 ];
-
-const KR_IMG_P006_WELLAGE_BLUE_AMPOULE = [
+const KR_P006 = [
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000231885/202604171442/crop0/www.wellage.co.kr/detail/OY_ha_ample/251118_02.jpg?created=202604171442",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000231885/202604171442/crop0/www.wellage.co.kr/detail/ha_ample_100_06_02.jpg?created=202604171442",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000231885/202604171442/crop0/www.wellage.co.kr/detail/ha_ample_100_09_01.jpg?created=202604171442",
 ];
-
-const KR_IMG_P010_ANUA_QUERCETINOL = [
+const KR_P010 = [
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000222790/202602261516/crop0/www.anua.kr/anua/dp/A_01_heartleaf/07_qctn_foam/250709/qctn_Foam_1.jpg?created=202602261519",
-  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000222790/202602261516/crop1/www.anua.kr/anua/dp/A_01_heartleaf/07_qctn_foam/250709/qctn_Foam_1.jpg?created=202602261519",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000222790/202602261516/crop0/www.anua.kr/anua/dp/A_01_heartleaf/ingredient/heartleaf_tm_1.jpg?created=202602261519",
-  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000222790/202602261516/crop1/www.anua.kr/anua/dp/A_01_heartleaf/ingredient/heartleaf_tm_1.jpg?created=202602261519",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000222790/202602261516/crop0/www.anua.kr/anua/dp/A_01_heartleaf/07_qctn_foam/250709/qctn_Foam_5.jpg?created=202602261519",
 ];
-
-const KR_IMG_P012_SUNGBOON_DEEP_COLLAGEN = [
+const KR_P012 = [
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000210971/202604091132/crop0/sungboon.com/sungboon/oliveyoung/deep_collagen/deep_collagen/02.jpg?created=202604101154",
-  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000210971/202604091132/crop0/sungboon.com/sungboon/oliveyoung/deep_collagen/deep_collagen/03.png?created=202604101154",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000210971/202604091132/crop0/sungboon.com/sungboon/oliveyoung/deep_collagen/deep_collagen/04.jpg?created=202604101154",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000210971/202604091132/crop0/sungboon.com/sungboon/oliveyoung/deep_collagen/deep_collagen/05.jpg?created=202604101154",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000210971/202604091132/crop0/sungboon.com/sungboon/oliveyoung/deep_collagen/deep_collagen/07.jpg?created=202604101154",
-  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000210971/202604091132/crop0/sungboon.com/sungboon/oliveyoung/deep_collagen/deep_collagen/08.jpg?created=202604101154",
 ];
-
-const KR_IMG_P013_CKD_RETINO_COLLAGEN = [
+const KR_P013 = [
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000180075/202603142223/crop0/gi.esmplus.com/ckdhcbeau1/Product_Page_2024/CKD/RETINO_COLLAGEN/guasha_neck_cream_202603/01.jpg?created=202603142228",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000180075/202603142223/crop0/gi.esmplus.com/ckdhcbeau1/Product_Page_2024/CKD/RETINO_COLLAGEN/guasha_neck_cream_202603/03.jpg?created=202603142228",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000180075/202603142223/crop0/gi.esmplus.com/ckdhcbeau1/Product_Page_2024/CKD/RETINO_COLLAGEN/guasha_neck_cream_202603/05.jpg?created=202603142228",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000180075/202603142223/crop0/gi.esmplus.com/ckdhcbeau1/Product_Page_2024/CKD/RETINO_COLLAGEN/guasha_neck_cream_202603/07.jpg?created=202603142228",
 ];
-
-const KR_IMG_P017_ABOUT_TONE_SUN_BASE = [
+const KR_P017 = [
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000235163/202604201814/crop0/abouttone.ivyro.net/product/abt_sunserumbase_2000_01.jpg?created=202604201815",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000235163/202604201814/crop0/abouttone.ivyro.net/product/abt_sunserumbase_2000_02.jpg?created=202604201815",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000235163/202604201814/crop0/abouttone.ivyro.net/product/abt_sunserumbase_2000_03.jpg?created=202604201815",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000235163/202604201814/crop0/abouttone.ivyro.net/product/abt_sunserumbase_2000_04.jpg?created=202604201815",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000235163/202604201814/crop0/abouttone.ivyro.net/product/abt_sunserumbase_2000_05.jpg?created=202604201815",
-  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000235163/202604201814/crop0/abouttone.ivyro.net/product/abt_sunserumbase_2000_06.jpg?created=202604201815",
 ];
-
-const KR_IMG_P019_SUNGBOON_GREEN_TOMATO = [
+const KR_P019 = [
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/260115/02_1.jpg?created=202604091138",
-  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/251017/03_0.jpg?created=202604091138",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/260115/03.jpg?created=202604091138",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/260115/04.jpg?created=202604091138",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/260115/06.jpg?created=202604091138",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/260115/08.jpg?created=202604091138",
-  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/260115/09_1.jpg?created=202604091138",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/260115/10.jpg?created=202604091138",
-  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/260115/11_2.jpg?created=202604091138",
-  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/260115/14.jpg?created=202604091138",
 ];
-
-const KR_IMG_P022_ESPOIR_BE_VELVET = [
+const KR_P022 = [
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000184222/202604291706/crop0/espoir.xcache.kinxcdn.com/product/makeup/face/bevelvet/25AD/Winter/01.jpg?created=202604291706",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000184222/202604291706/crop0/espoir.xcache.kinxcdn.com/product/makeup/face/bevelvet/25AD/Winter/02.jpg?created=202604291706",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000184222/202604291706/crop0/espoir.xcache.kinxcdn.com/product/makeup/face/bevelvet/25AD/Winter/03.jpg?created=202604291706",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000184222/202604291706/crop0/espoir.xcache.kinxcdn.com/product/makeup/face/bevelvet/25AD/Winter/04.jpg?created=202604291706",
 ];
-
-const KR_IMG_P024_ESPOIR_WATER_SPLASH = [
+const KR_P024 = [
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000179353/202604132122/crop0/espoir.xcache.kinxcdn.com/product/makeup/sun/watersplash/sunsera/sunsera_01_re.jpg?created=202604132122",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000179353/202604132122/crop0/espoir.xcache.kinxcdn.com/product/makeup/sun/watersplash/sunsera/sunsera_03_oy.jpg?created=202604132122",
-  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000179353/202604132122/crop0/espoir.xcache.kinxcdn.com/product/makeup/sun/watersplash/sunsera/sunsera_04_oy_sun_lineup.jpg?created=202604132122",
 ];
+const KR_P034 = ["https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000158322/202507281138/crop0/image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/attached/2025/04/09/c24_09144119.jpg?created=202511131316"];
 
-const KR_IMG_P034_ONE_THING_NIACINAMIDE = [
-  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000158322/202507281138/crop0/image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/attached/2025/04/09/c24_09144119.jpg?created=202511131316",
-];
+const W = "https://www.ohmyglow.co/wp-content/uploads/";
 
 export const allProducts: Product[] = [
-  p("P001", "ANUA", "魚腥草X維B3鋅舒緩減紅抗痘修護精華", "Heartleaf 77 + B3Zinc Soothing Serum", "anua-heartleaf-77-b3zinc-soothing-serum", "skincare", "serum", 168, null,
-    "https://www.ohmyglow.co/wp-content/uploads/2026/04/OYOTANUAHeartleaf-77-B3-Zinc-Trouble-Serum-30ml-Double-Set-cover.png",
-    "ANUA 77 魚腥草精華升級配方，針對反覆出現嘅問題肌打造嘅舒緩精華。以核心魚腥草系列強化配方，搭配獨家 99,100ppm B3 Zinc™ 複合物，提升精華滲透同鎮靜效果。",
-    ["new", "bestseller"], ["acne", "redness", "sensitive"], "30ml", 4.8, 312, 50, KR_IMG_P001_ANUA_HEARTLEAF_77),
-
-  p("P002", "Torriden", "DIVE-IN 低分子透明質酸爽膚棉片", "DIVE-IN Low Molecule Hyaluronic Acid Multi Pad", "torriden-dive-in-multi-pad", "skincare", "toner", 188, 118,
-    "https://www.ohmyglow.co/wp-content/uploads/2022/05/TORRIDEN.DIVE-IN-Low-Molecule-Hyaluronic-Acid-Multi-Pad-cover-new-1.jpg",
-    "Torriden Dive-In 低分子透明質酸爽膚棉片，快速補水鎮靜，收縮毛孔。3秒內極速補水，薄薄棉片牢牢緊貼肌膚，所有膚質適用。",
-    ["bestseller", "sale"], ["dry", "sensitive"], "80片", 4.9, 1842, 50, KR_IMG_P002_TORRIDEN_DIVE_IN),
-
-  p("P003", "Round Lab", "專利複合維他命維B3美白淡斑精華", "Vita Niacinamide Dark Spot Serum", "round-lab-vita-niacinamide-serum", "skincare", "serum", 218, 138,
-    "https://www.ohmyglow.co/wp-content/uploads/2025/05/ROUND-LAB-VITA-NIACINAMIDE-DARK-SPOT-SERUM-30ml-cover.jpg",
-    "高濃度菸鹼醯胺配方。維他命B3 比一般維他命C穩定，集中明亮膚色，改善暗沉與斑點。",
-    ["bestseller", "sale"], ["dark-spots", "uneven-tone"], "30ml", 4.7, 568),
-
-  p("P004", "Round Lab", "松樹積雪草控油特效舒緩清爽防曬", "Pine Calming CICA Sunscreen SPF50+ PA++++", "round-lab-pine-calming-sunscreen", "skincare", "sunscreen", 228, 138,
-    "https://www.ohmyglow.co/wp-content/uploads/2025/09/ROUND-LAB-PINE-CALMING-CICA-SUNSCREEN-40ml-cover.jpg",
-    "ROUND LAB 松樹舒緩積雪草防曬霜，SPF50+ PA++++ 高效防曬全方位防護。質地輕薄不黏膩，清爽無負擔，一次基本清潔即可徹底卸除。",
-    ["bestseller", "sale"], ["sensitive", "oily", "acne"], "40ml", 4.8, 921),
-
-  p("P005", "numbuzin", "No.3 植萃米酵素嫩膚深清泡泡潔面乳", "No.3 Rice Enzyme Skin Softening Cleansing Foam", "numbuzin-no3-rice-cleansing-foam", "skincare", "cleanser", 128, 78,
-    "https://www.ohmyglow.co/wp-content/uploads/2024/12/numbuzin-No.3-Rice-Enzyme-Skin-Softening-Cleansing-Foam-cover-1.jpg",
-    "大米酵素＋獨特三階段轉化技術 (mask → peeling → foam)，一支3用！霜狀按摩、輕盈去角質、豐富酵素泡泡潔面。",
-    ["new", "sale"], ["dry", "dullness"], "170ml", 4.6, 287),
-
-  p("P006", "Wellage", "Real Hyaluronic Blue Ampoule 100% 純透明質酸保濕精華", "Real Hyaluronic Blue Ampoule", "wellage-real-hyaluronic-blue-ampoule", "skincare", "serum", 168, 118,
-    "https://www.ohmyglow.co/wp-content/uploads/2023/11/Wellage-Real-Hyaluronic-Blue-Ampoule-cover-1.jpg",
-    "2025全年度 GlowPick Award 最佳保濕精華第一名。水狀質地不黏稠易吸收，主打 100% 純透明質酸，由內到外飲飽水。",
-    ["bestseller", "award-winning"], ["dry", "sensitive"], "60ml", 4.9, 2103, 50, KR_IMG_P006_WELLAGE_BLUE_AMPOULE),
-
-  p("P007", "isntree", "極低分子透明質酸保濕精華", "Ultra-Low Molecular Hyaluronic Acid Serum", "isntree-ultra-low-ha-serum", "skincare", "serum", 168, 138,
-    "https://www.ohmyglow.co/wp-content/uploads/2023/06/isntree-Ultra-Low-Molecular-Hyaluronic-Acid-Serum-cover-1.jpg",
-    "極低分子透明質酸深入肌膚底層，提供持久保濕。純素配方適合所有肌膚類型。",
-    ["vegan", "bestseller"], ["dry", "sensitive"], "50ml", 4.7, 658),
-
-  p("P008", "beplain", "綠豆弱酸洗面奶", "Mung Bean PH-balanced Cleansing Foam", "beplain-mung-bean-cleansing-foam", "skincare", "cleanser", 110, 78,
-    "https://www.ohmyglow.co/wp-content/uploads/2022/01/beplain-mung-bean-ph-balanced-cleansing-foam-cover-1.jpg",
-    "pH 5.5 弱酸性，深層清潔毛孔同時保持肌膚水潤。含 32.17% 綠豆提取物，溫和不刺激，敏感肌適用。",
-    ["bestseller"], ["sensitive", "dry"], "80ml", 4.8, 1456),
-
-  p("P009", "Medicube", "Deep Vita C Pad 高濃度維C美白去暗沉爽膚棉片", "Deep Vita C Pad", "medicube-deep-vita-c-pad", "skincare", "toner", 298, 168,
-    "https://www.ohmyglow.co/wp-content/uploads/2025/02/medicube-Deep-Vita-C-Pad-cover-1.jpg",
-    "高濃度維他命C衍生物及 500,000 ppm 維他命樹水，含 2% Niacinamide，有效改善色斑同提亮膚色。",
-    ["bestseller"], ["dark-spots", "dullness"], "70片", 4.8, 1234),
-
-  p("P010", "ANUA", "魚腥草槲皮素毛孔深清潔膚乳", "Heartleaf Quercetinol Pore Deep Cleansing Foam", "anua-heartleaf-quercetinol-cleansing", "skincare", "cleanser", 118, 89,
-    "https://www.ohmyglow.co/wp-content/uploads/2023/10/anua-HEARTLEAF-QUERCETINOL-PORE-DEEP-CLEANSING-FOAM-cover-1.jpg",
-    "深清毛孔，洗走黑頭暗粒油光角質。質地順滑 creamy 柔軟，加有細顆粒鮮魚腥草，輕易搓出綿密泡泡。",
-    ["bestseller"], ["pores", "oily", "blackheads"], "150ml", 4.7, 879, 50, KR_IMG_P010_ANUA_QUERCETINOL),
-
-  p("P011", "DEWYTREE", "AC Deep Calming 涼感降溫積雪草深層鎮靜減紅面膜", "AC Deep Calming Mask", "dewytree-ac-deep-calming-mask", "skincare", "mask", 126, 16,
-    "https://www.ohmyglow.co/wp-content/uploads/2025/08/DEWYTREE-AC-DEEP-CALMING-MASK-10EA-27g10EA-cover.jpg",
-    "即時降低肌膚溫度，舒緩外部刺激引起嘅泛紅同不適。獨家成分 CICAMINT™ 安撫受損肌膚。",
-    ["sale"], ["redness", "sensitive", "dry"], "27g x 10片", 4.6, 234),
-
-  p("P012", "Sungboon Editor", "深層低分子膠原＋煙醯胺維他命C 亮白果凍面膜", "Deep Collagen Niacin Vita C Brightening Mask", "sungboon-deep-collagen-mask", "skincare", "mask", 128, 38,
-    "https://www.ohmyglow.co/wp-content/uploads/2026/01/Sungboon-Editor-Deep-Collagen-Niacin-Vita-C-Brightening-Mask-cover-2.jpg",
-    "低分子膠原為基底嘅 hydrogel 果凍精華面膜，富含高濃度膠原同亮白活性成分，一次改善暗沉膚色與提升彈力。",
-    ["sale"], ["dark-spots", "dry", "fine-lines"], "4片裝", 4.7, 512, 50, KR_IMG_P012_SUNGBOON_DEEP_COLLAGEN),
-
-  p("P013", "CKD", "Retino Collagen 維A視黃醇低分子膠原蛋白提彈淡紋面霜", "Retino Collagen Small Molecule 300 Cream", "ckd-retino-collagen-cream", "skincare", "cream", 279, 138,
-    "https://www.ohmyglow.co/wp-content/uploads/2025/04/CKD-Retino-Collagen-Small-Molecule-300-Cream-cover-1.jpg",
-    "低分子膠原蛋白霜，吸收力強嘅彈力乳霜，有效增強皮膚彈性同淡化皺紋。小分子膠原蛋白 X 第三代維A X 脂質體膠囊三重活性。",
-    ["anti-aging"], ["wrinkles", "dry", "elasticity"], "40ml", 4.6, 367, 50, KR_IMG_P013_CKD_RETINO_COLLAGEN),
-
-  p("P014", "Torriden", "DIVE-IN 低分子透明質酸溫和低敏卸妝水", "DIVE-IN Low Molecular HA Cleansing Water", "torriden-dive-in-cleansing-water", "skincare", "cleanser", 49, null,
-    "https://www.ohmyglow.co/wp-content/uploads/2022/08/torriden-dive-in-cleansing-water.jpg",
-    "5D 複合透明質酸，深層保濕同時溫和卸妝。低敏配方適合敏感肌膚，無需沖洗，方便快捷。",
-    ["new"], ["dry", "sensitive"], "100ml", 4.5, 198),
-
-  p("P015", "Cosnori", "有機牛油果油米萃純素眼霜", "Avocado Eye Cream All Face", "cosnori-avocado-eye-cream", "skincare", "eye-care", 169, 96,
-    "https://www.ohmyglow.co/wp-content/uploads/2023/12/cosnori-Avocado-Eyecream-All-Face-30ml-cover-1.jpg",
-    "Cosnori 皇牌熱賣眼霜，化解評測 4.57/5.0。富含 66.9% 米萃取同有機牛油果油，有效對抗黑眼圈同細紋。",
-    ["bestseller", "vegan"], ["dark-circles", "fine-lines"], "30ml", 4.7, 1023),
-
-  p("P016", "Some By Mi", "BYE BYE BLACKHEAD 30天奇蹟去黑頭綠茶深清泡泡潔面", "BYE BYE BLACKHEAD Bubble Cleanser", "somebymi-bye-bye-blackhead", "skincare", "cleanser", 168, 96,
-    "https://www.ohmyglow.co/wp-content/uploads/2022/12/Some-By-Mi-BYE-BYE-BLACKHEAD-30-Days-Miracle-Green-Tea-Tox-Bubble-Cleanser-cover-1.jpg",
-    "16種茶同天然植物提取嘅 BHA，有效去除黑頭、收緊毛孔，溫和去角質。每週使用 2-3 次，肌膚明亮光滑。",
-    ["bestseller"], ["blackheads", "pores", "dullness"], "120g", 4.6, 743),
-
-  p("P017", "About Tone", "Sun Serum Base 妝前防曬精華", "Sun Serum Base SPF50+ PA++++", "about-tone-sun-serum-base", "skincare", "sunscreen", 138, 79,
-    "https://www.ohmyglow.co/wp-content/uploads/2025/11/About-Tone-Sun-Serum-Base-cover-1.jpg",
-    "妝前防曬精華結合保濕、防曬同持妝，妝容更服貼持久。75% 水感保濕成分，輕盈水潤無黏膩感。",
-    ["new"], ["dry", "acne", "dark-spots"], "30ml", 4.7, 156, 50, KR_IMG_P017_ABOUT_TONE_SUN_BASE),
-
-  p("P018", "CKD", "高濃度綠蜂膠 3合1 美肌提亮有色物理防曬", "Green Propolis All-covery Sun SPF50+ PA++++", "ckd-green-propolis-sun", "skincare", "sunscreen", 189, 89,
-    "https://www.ohmyglow.co/wp-content/uploads/2025/01/CKD-Green-Propolis-All-covery-Sun-cover-6.jpg",
-    "高濃度綠蜂膠 3合1 防曬：皺紋改善、美白同 UV 防曬三重功能。自然輕盈妝效。",
-    ["sale"], ["dry", "dark-spots", "wrinkles"], "40ml", 4.5, 412),
-
-  p("P019", "Sungboon Editor", "Green Tomato NMN 毛孔緊緻安瓶", "Green Tomato NMN Pore Lifting Ampoule", "sungboon-green-tomato-ampoule", "skincare", "serum", 268, 128,
-    "https://www.ohmyglow.co/wp-content/uploads/2026/02/Sungboon-Editor-Green-Tomato-NMN-Pore-Lifting-Ampoule-detail-3.jpg",
-    "皇牌人氣安瓶累計銷量數百萬瓶，全新升級配方。專利綠番茄 X 高濃度 NMN，針對縱向、橫向、色素同下陷毛孔提供 3D 改善。",
-    ["bestseller"], ["pores", "elasticity"], "40ml", 4.8, 1567, 50, KR_IMG_P019_SUNGBOON_GREEN_TOMATO),
-
-  p("P020", "CLIO", "Sharp So Simple 極細防水眼線筆", "Sharp So Simple Waterproof Pencil Liner", "clio-sharp-so-simple-liner", "makeup", "eye-brow", 120, 68,
-    "https://www.ohmyglow.co/wp-content/uploads/2024/02/clio-Sharp-So-Simple-Waterproof-Pencil-Liner-01-11-cover-1.jpg",
-    "CLIO No.1 眼線筆，超纖細 2mm 筆芯設計，線條細緻。持久防水配方，防汗、防油、不易暈染。",
-    ["bestseller"], [], "0.14g", 4.9, 3245),
-
-  p("P021", "OddType", "Unseen Blur 軟霧絲絨不沾杯唇釉", "Unseen Blur Tint", "oddtype-unseen-blur-tint", "makeup", "lip", 168, 128,
-    "https://www.ohmyglow.co/wp-content/uploads/2023/09/OddType-Unseen-Blur-Tint-14-colors-cover-1.jpg",
-    "革命性小圓平頭暈染唇掃頭，配合軟滑慕絲質地配方，塗出不厚重高質絲絨唇妝。",
-    ["new"], [], "4g", 4.7, 892),
-
-  p("P022", "Espoir", "Pro Tailor Be Velvet Cover 持久絲絨啞緻氣墊粉底", "Pro Tailor Be Velvet Cover Cushion", "espoir-pro-tailor-velvet-cushion", "makeup", "face", 168, null,
-    "https://www.ohmyglow.co/wp-content/uploads/2023/07/espoir-Protailor-Be-Velvet-Cover-Cushion-New-Class-cover-1.jpg",
-    "持久絲絨啞緻氣墊粉底，配方輕薄能有效遮蓋毛孔，妝容自然無瑕。",
-    ["bestseller", "vegan"], [], "13g + 13g Refill", 4.8, 1876, 50, KR_IMG_P022_ESPOIR_BE_VELVET),
-
-  p("P023", "NAMING.", "Zero Gravity Cover Fit 零重力輕盈貼服氣墊粉底", "Zero Gravity Cover Fit Cushion SPF40 PA++", "naming-zero-gravity-cushion", "makeup", "face", 159, 104,
-    "https://www.ohmyglow.co/wp-content/uploads/2024/09/naming-Zero-Gravity-Cover-Fit-Cushion-cover-1.jpg",
-    "蝴蝶區毛孔完美修飾，底妝光滑舒服。針對凹凸不平、毛孔瑕疵，無重貼薄輕盈底妝。",
-    ["bestseller", "new"], [], "13g + Refill", 4.7, 654),
-
-  p("P024", "Espoir", "Water Splash 爆水提亮潤色防曬乳霜", "Water Splash Sun Cream Ceramide", "espoir-water-splash-sun-cream", "skincare", "sunscreen", 168, 118,
-    "https://www.ohmyglow.co/wp-content/uploads/2023/03/Espoir-Water-Splash-Sun-Cream-Ceramide-cover-1.jpg",
-    "Espoir 皇牌爆水防曬霜添加 Ceramide 神經酰胺成份，加強皮膚屏障，提高保濕能力。充滿水分清爽感，肌膚水潤柔軟。",
-    ["bestseller"], ["dry"], "60ml", 4.7, 1124, 50, KR_IMG_P024_ESPOIR_WATER_SPLASH),
-
-  p("P025", "Glossier", "Lash Slick 皇牌纖長持久睫毛膏", "Lash Slick", "glossier-lash-slick", "makeup", "eye-brow", 175, null,
-    "https://www.ohmyglow.co/wp-content/uploads/Lash-Slick-1.jpg",
-    "自然增長睫毛，根根分明、自然纖長嘅濃密睫毛。妝效持久，不暈染不結塊，溫水可卸。",
-    ["bestseller"], [], "8.5g", 4.6, 432),
-
-  p("P026", "The Saem", "Cover Perfection 多功能完美遮瑕筆", "Cover Perfection Concealer Pencil", "thesaem-cover-perfection-concealer", "makeup", "face", 42, 35,
-    "https://www.ohmyglow.co/wp-content/uploads/2023/09/the-saem-Cover-Perfection-Concealer-Pencil-cover-1-3.jpg",
-    "2025 GlowPick Awards 第一名遮瑕筆。多種顏色選擇適合不同膚色，方便隨時隨地補妝。",
-    ["bestseller", "award-winning"], [], "1.4g", 4.8, 2891),
-
-  p("P027", "Colorgram", "Micro Slim 纖細雙頭眉筆", "Micro Slim Brow Pencil", "colorgram-micro-slim-brow-pencil", "makeup", "eye-brow", 76, 38,
-    "https://www.ohmyglow.co/wp-content/uploads/2025/04/colorgram-Micro-Slim-Brow-Pencil-cover-1.jpg",
-    "纖細雙頭眉筆，方便攜帶。顏色自然，持久不脫妝，眉毛立體感更佳。",
-    ["sale"], [], "0.04g", 4.5, 256),
-
-  p("P028", "twoedit by LUNA", "多功能修飾校正雙色遮瑕盤", "Skin Cover Conceal Palette", "twoedit-skin-cover-conceal", "makeup", "face", 54, null,
-    "https://www.ohmyglow.co/wp-content/uploads/2025/07/DaisoLuna-Skin-Cover-Conceal-Palette-cover.avif",
-    "專為亞洲肌膚打造嘅多功能修飾遮瑕盤，隨心混合、量膚調色，滿足所有肌膚需求。",
-    ["new"], [], "4g", 4.6, 178),
-
-  p("P029", "moev", "Annurcatin 天然蘋果多酚無矽洗髮露", "Annurcatin Shampoo", "moev-annurcatin-shampoo", "body-hair", "hair-care", 116, null,
-    "https://www.ohmyglow.co/wp-content/uploads/2025/06/moev-Annurcatin-Shampoo-300ml-cover.jpg",
-    "100% 自然來源界面活性劑，為頭皮同髮絲帶來溫和清潔。針對脆弱及受損頭皮，加強髮根力量。",
-    ["new"], [], "300ml", 4.7, 423),
-
-  p("P030", "moss", "Hand & Body Lotion 持久療癒芳香潤膚乳液 #Pause", "Hand & Body Lotion Pause", "moss-hand-body-lotion-pause", "body-hair", "body-care", 310, 196,
-    "https://www.ohmyglow.co/wp-content/uploads/2023/12/Moss-Hand-Body-lotion-pause.jpg",
-    "為日常增添香氣體驗。需要休息嘅時候，停止你正在做嘅事情，閉上眼睛專注於滲入嘅空氣。",
-    ["bestseller"], ["dry"], "300ml", 4.8, 567),
-
-  p("P031", "Milk Touch", "野人參金 PDRN 日常特別面膜", "Wild Ginseng Gold PDRN Daily Special Mask", "milk-touch-wild-ginseng-pdrn-mask", "skincare", "mask", 268, 179,
-    "https://www.ohmyglow.co/wp-content/uploads/2024/10/Milk-Touch-Wild-Ginseng-Gold-PDRN-Daily-Special-Mask-cover-1.jpg",
-    "野人參同 PDRN 成分有效滋潤同修復肌膚。適合日常使用，幫助提升肌膚光澤感。",
-    ["new"], ["dry", "sensitive"], "30片", 4.7, 234),
-
-  p("P032", "Torhop", "桑拿海鹽＋綠泥膠原蛋白面膜禮盒", "Saunan Heating Salt + Loyly Green Mud Mask Set", "torhop-saunan-loyly-set", "skincare", "mask", 258, 199,
-    "https://www.ohmyglow.co/wp-content/uploads/2025/02/Torhop-Gift-Wrapping-Saunan-Heating-Salt-Mask-35g-Loyly-Green-mud-Collagen-Mask-35g-Set-cover-1.jpg",
-    "Torhop 精美禮盒裝，家中一邊 shower 一邊做美肌 SPA。包含桑拿海鹽面膜 35g 同綠泥膠原蛋白面膜 35g。",
-    ["sale"], ["pores", "oily"], "35g x 2", 4.6, 189),
-
-  p("P033", "WHIPPED", "Vegan Pack 天然植萃溫和弱酸性卸妝潔面乳", "Vegan Pack Cleanser", "whipped-vegan-pack-cleanser", "skincare", "cleanser", 159, null,
-    "https://www.ohmyglow.co/wp-content/uploads/2025/05/Whipped-Vegan-Pack-Cleanser-cover-1.jpg",
-    "潔面、面膜及護理三合一。低過敏性配方，有效清除防曬同彩妝，敏感肌適用。",
-    ["vegan"], ["sensitive", "dry"], "130g", 4.6, 145),
-
-  p("P034", "ONE THING", "Niacinamide Glutathione 5% 維B穀胱甘肽美白爽膚水", "Niacinamide Glutathione Toner 5%", "one-thing-niacinamide-toner", "skincare", "toner", 186, 138,
-    "https://www.ohmyglow.co/wp-content/uploads/2025/01/One-Thing-Niacinamide-Glutathione-Toner-cover-1.jpg",
-    "5% Niacinamide 均勻膚色，改善色素沉著。Glutathione 加強美白，無刺激滋潤保養。",
-    ["bestseller"], ["dark-spots", "sensitive"], "210ml", 4.7, 678, 50, KR_IMG_P034_ONE_THING_NIACINAMIDE),
-
-  p("P035", "numbuzin", "No.3 Radiance Glowing 酵母提亮去暗沉爽膚棉片", "No.3 Radiance Glowing Jumbo Pad", "numbuzin-no3-radiance-pad", "skincare", "toner", 198, 138,
-    "https://www.ohmyglow.co/wp-content/uploads/2023/11/numbuzin-No.3-Radiance-Glowing-Jumbo-Essence-Pad-cover-1.jpg",
-    "50種氨基酸、礦物質等發酵成份精華，重啟透亮光澤肌。適合皮膚粗糙、捱夜臘黃肌。",
-    ["bestseller"], ["dullness", "sensitive"], "70片", 4.8, 1289),
-
-  p("P036", "S.Nature", "Aqua Oasis 綠洲泛醇保濕降溫舒緩棉片", "Aqua Oasis Panthe-Allan Calming Pad", "snature-aqua-oasis-pad", "skincare", "toner", 198, 126,
-    "https://www.ohmyglow.co/wp-content/uploads/2024/11/S-NATURE-Aqua-Oasis-Panthe-Allan-Calming-Pad-cover.jpg",
-    "D-泛醇 30,000ppm + 尿囊素 1,500ppm + 8 種透明質酸，強效保濕同舒緩。EWG 綠色等級認證。",
-    ["bestseller"], ["sensitive", "dry"], "60片", 4.8, 945),
+  p({id:"P001",brand:"ANUA",nameZh:"魚腥草X維B3鋅舒緩減紅抗痘修護精華",nameEn:"Heartleaf 77 + B3Zinc Soothing Serum",slug:"anua-heartleaf-77-b3zinc-soothing-serum",category:"skincare",subcategory:"serum",priceOriginal:168,priceSale:null,imageUrl:`${W}2026/04/OYOTANUAHeartleaf-77-B3-Zinc-Trouble-Serum-30ml-Double-Set-cover.png`,descriptionZh:"ANUA 77 魚腥草精華升級配方，針對反覆出現嘅問題肌打造嘅舒緩精華。",tags:["new","bestseller"],skinConcerns:["acne","redness","sensitive"],volume:"30ml",rating:4.8,reviewCount:312,krImages:KR_P001}),
+  p({id:"P002",brand:"Torriden",nameZh:"DIVE-IN 低分子透明質酸爽膚棉片",nameEn:"DIVE-IN Low Molecule Hyaluronic Acid Multi Pad",slug:"torriden-dive-in-multi-pad",category:"skincare",subcategory:"toner",priceOriginal:188,priceSale:118,imageUrl:`${W}2022/05/TORRIDEN.DIVE-IN-Low-Molecule-Hyaluronic-Acid-Multi-Pad-cover-new-1.jpg`,descriptionZh:"3秒內極速補水，薄薄棉片牢牢緊貼肌膚，所有膚質適用。",tags:["bestseller","sale"],skinConcerns:["dry","sensitive"],volume:"80片",rating:4.9,reviewCount:1842,krImages:KR_P002}),
+  p({id:"P003",brand:"Round Lab",nameZh:"專利複合維他命維B3美白淡斑精華",nameEn:"Vita Niacinamide Dark Spot Serum",slug:"round-lab-vita-niacinamide-serum",category:"skincare",subcategory:"serum",priceOriginal:218,priceSale:138,imageUrl:`${W}2025/05/ROUND-LAB-VITA-NIACINAMIDE-DARK-SPOT-SERUM-30ml-cover.jpg`,descriptionZh:"高濃度菸鹼醯胺精華配方，改善暗沉與斑點。",tags:["bestseller","sale"],skinConcerns:["dark-spots"],volume:"30ml",rating:4.7,reviewCount:568}),
+  p({id:"P004",brand:"Round Lab",nameZh:"松樹積雪草控油特效舒緩防曬",nameEn:"Pine Calming CICA Sunscreen SPF50+",slug:"round-lab-pine-calming-sunscreen",category:"skincare",subcategory:"sunscreen",priceOriginal:228,priceSale:138,imageUrl:`${W}2025/09/ROUND-LAB-PINE-CALMING-CICA-SUNSCREEN-40ml-cover.jpg`,descriptionZh:"SPF50+ PA++++ 高效防曬全方位防護，質地輕薄不黏膩。",tags:["bestseller","sale"],skinConcerns:["sensitive","oily","acne"],volume:"40ml",rating:4.8,reviewCount:921}),
+  p({id:"P005",brand:"numbuzin",nameZh:"No.3 米酵素嫩膚深清泡泡潔面乳",nameEn:"No.3 Rice Enzyme Cleansing Foam",slug:"numbuzin-no3-rice-cleansing-foam",category:"skincare",subcategory:"cleanser",priceOriginal:128,priceSale:78,imageUrl:`${W}2024/12/numbuzin-No.3-Rice-Enzyme-Skin-Softening-Cleansing-Foam-cover-1.jpg`,descriptionZh:"大米酵素三階段轉化技術，一支3用！",tags:["new","sale"],skinConcerns:["dry","dullness"],volume:"170ml",rating:4.6,reviewCount:287}),
+  p({id:"P006",brand:"Wellage",nameZh:"Real Hyaluronic Blue Ampoule 100% 純透明質酸保濕精華",nameEn:"Real Hyaluronic Blue Ampoule",slug:"wellage-real-hyaluronic-blue-ampoule",category:"skincare",subcategory:"serum",priceOriginal:168,priceSale:118,imageUrl:`${W}2023/11/Wellage-Real-Hyaluronic-Blue-Ampoule-cover-1.jpg`,descriptionZh:"2025全年度 GlowPick Award 最佳保濕精華第一名。",tags:["bestseller","award-winning"],skinConcerns:["dry","sensitive"],volume:"60ml",rating:4.9,reviewCount:2103,krImages:KR_P006}),
+  p({id:"P007",brand:"isntree",nameZh:"極低分子透明質酸保濕精華",nameEn:"Ultra-Low Molecular Hyaluronic Acid Serum",slug:"isntree-ultra-low-ha-serum",category:"skincare",subcategory:"serum",priceOriginal:168,priceSale:138,imageUrl:`${W}2023/06/isntree-Ultra-Low-Molecular-Hyaluronic-Acid-Serum-cover-1.jpg`,descriptionZh:"極低分子透明質酸深入肌膚底層，提供持久保濕。",tags:["vegan","bestseller"],skinConcerns:["dry","sensitive"],volume:"50ml",rating:4.7,reviewCount:658}),
+  p({id:"P008",brand:"beplain",nameZh:"綠豆弱酸洗面奶",nameEn:"Mung Bean PH-balanced Cleansing Foam",slug:"beplain-mung-bean-cleansing-foam",category:"skincare",subcategory:"cleanser",priceOriginal:110,priceSale:78,imageUrl:`${W}2022/01/beplain-mung-bean-ph-balanced-cleansing-foam-cover-1.jpg`,descriptionZh:"pH 5.5 弱酸性，含 32.17% 綠豆提取物，溫和不刺激。",tags:["bestseller"],skinConcerns:["sensitive","dry"],volume:"80ml",rating:4.8,reviewCount:1456}),
+  p({id:"P009",brand:"Medicube",nameZh:"Deep Vita C Pad 高濃度維C美白棉片",nameEn:"Deep Vita C Pad",slug:"medicube-deep-vita-c-pad",category:"skincare",subcategory:"toner",priceOriginal:298,priceSale:168,imageUrl:`${W}2025/02/medicube-Deep-Vita-C-Pad-cover-1.jpg`,descriptionZh:"高濃度維C衍生物及 500,000ppm 維他命樹水。",tags:["bestseller"],skinConcerns:["dark-spots","dullness"],volume:"70片",rating:4.8,reviewCount:1234}),
+  p({id:"P010",brand:"ANUA",nameZh:"魚腥草槲皮素毛孔深清潔膚乳",nameEn:"Heartleaf Quercetinol Pore Deep Cleansing Foam",slug:"anua-heartleaf-quercetinol-cleansing",category:"skincare",subcategory:"cleanser",priceOriginal:118,priceSale:89,imageUrl:`${W}2023/10/anua-HEARTLEAF-QUERCETINOL-PORE-DEEP-CLEANSING-FOAM-cover-1.jpg`,descriptionZh:"深清毛孔，洗走黑頭暗粒油光角質。",tags:["bestseller"],skinConcerns:["pores","oily","blackheads"],volume:"150ml",rating:4.7,reviewCount:879,krImages:KR_P010}),
+  p({id:"P011",brand:"DEWYTREE",nameZh:"AC Deep Calming 涼感降溫積雪草鎮靜面膜",nameEn:"AC Deep Calming Mask",slug:"dewytree-ac-deep-calming-mask",category:"skincare",subcategory:"mask",priceOriginal:126,priceSale:16,imageUrl:`${W}2025/08/DEWYTREE-AC-DEEP-CALMING-MASK-10EA-27g10EA-cover.jpg`,descriptionZh:"即時降低肌膚溫度，舒緩泛紅同不適。",tags:["sale"],skinConcerns:["redness","sensitive"],volume:"27g x 10片",rating:4.6,reviewCount:234}),
+  p({id:"P012",brand:"Sungboon Editor",nameZh:"深層低分子膠原+煙醯胺維他命C 亮白果凍面膜",nameEn:"Deep Collagen Niacin Vita C Brightening Mask",slug:"sungboon-deep-collagen-mask",category:"skincare",subcategory:"mask",priceOriginal:128,priceSale:38,imageUrl:`${W}2026/01/Sungboon-Editor-Deep-Collagen-Niacin-Vita-C-Brightening-Mask-cover-2.jpg`,descriptionZh:"低分子膠原為基底嘅 hydrogel 果凍精華面膜。",tags:["sale"],skinConcerns:["dark-spots","fine-lines"],volume:"4片裝",rating:4.7,reviewCount:512,krImages:KR_P012}),
+  p({id:"P013",brand:"CKD",nameZh:"Retino Collagen 維A視黃醇低分子膠原蛋白提彈淡紋面霜",nameEn:"Retino Collagen Small Molecule 300 Cream",slug:"ckd-retino-collagen-cream",category:"skincare",subcategory:"cream",priceOriginal:279,priceSale:138,imageUrl:`${W}2025/04/CKD-Retino-Collagen-Small-Molecule-300-Cream-cover-1.jpg`,descriptionZh:"低分子膠原蛋白霜，吸收力強嘅彈力乳霜。",tags:["anti-aging"],skinConcerns:["wrinkles","dry","elasticity"],volume:"40ml",rating:4.6,reviewCount:367,krImages:KR_P013}),
+  p({id:"P014",brand:"Torriden",nameZh:"DIVE-IN 低分子透明質酸溫和卸妝水",nameEn:"DIVE-IN HA Cleansing Water",slug:"torriden-dive-in-cleansing-water",category:"skincare",subcategory:"cleanser",priceOriginal:49,priceSale:null,imageUrl:`${W}2022/08/torriden-dive-in-cleansing-water.jpg`,descriptionZh:"5D複合透明質酸，深層保濕同時溫和卸妝。",tags:["new"],skinConcerns:["dry","sensitive"],volume:"100ml",rating:4.5,reviewCount:198}),
+  p({id:"P015",brand:"Cosnori",nameZh:"有機牛油果油米萃純素眼霜",nameEn:"Avocado Eye Cream All Face",slug:"cosnori-avocado-eye-cream",category:"skincare",subcategory:"eye-care",priceOriginal:169,priceSale:96,imageUrl:`${W}2023/12/cosnori-Avocado-Eyecream-All-Face-30ml-cover-1.jpg`,descriptionZh:"皇牌熱賣眼霜，化解評測 4.57/5.0。",tags:["bestseller","vegan"],skinConcerns:["dark-circles","fine-lines"],volume:"30ml",rating:4.7,reviewCount:1023}),
+  p({id:"P016",brand:"Some By Mi",nameZh:"BYE BYE BLACKHEAD 30天奇蹟去黑頭潔面",nameEn:"BYE BYE BLACKHEAD Cleanser",slug:"somebymi-bye-bye-blackhead",category:"skincare",subcategory:"cleanser",priceOriginal:168,priceSale:96,imageUrl:`${W}2022/12/Some-By-Mi-BYE-BYE-BLACKHEAD-30-Days-Miracle-Green-Tea-Tox-Bubble-Cleanser-cover-1.jpg`,descriptionZh:"16種茶同天然植物提取嘅 BHA，去除黑頭、收緊毛孔。",tags:["bestseller"],skinConcerns:["blackheads","pores"],volume:"120g",rating:4.6,reviewCount:743}),
+  p({id:"P017",brand:"About Tone",nameZh:"Sun Serum Base 妝前防曬精華 SPF50+",nameEn:"Sun Serum Base SPF50+",slug:"about-tone-sun-serum-base",category:"skincare",subcategory:"sunscreen",priceOriginal:138,priceSale:79,imageUrl:`${W}2025/11/About-Tone-Sun-Serum-Base-cover-1.jpg`,descriptionZh:"75% 水感保濕成分，妝容更服貼持久。",tags:["new"],skinConcerns:["dry","acne"],volume:"30ml",rating:4.7,reviewCount:156,krImages:KR_P017}),
+  p({id:"P018",brand:"CKD",nameZh:"高濃度綠蜂膠 3合1 美肌提亮防曬",nameEn:"Green Propolis All-covery Sun",slug:"ckd-green-propolis-sun",category:"skincare",subcategory:"sunscreen",priceOriginal:189,priceSale:89,imageUrl:`${W}2025/01/CKD-Green-Propolis-All-covery-Sun-cover-6.jpg`,descriptionZh:"高濃度綠蜂膠 3合1 防曬：皺紋改善、美白同 UV 防曬。",tags:["sale"],skinConcerns:["dry","dark-spots"],volume:"40ml",rating:4.5,reviewCount:412}),
+  p({id:"P019",brand:"Sungboon Editor",nameZh:"Green Tomato NMN 毛孔緊緻安瓶",nameEn:"Green Tomato NMN Pore Lifting Ampoule",slug:"sungboon-green-tomato-ampoule",category:"skincare",subcategory:"serum",priceOriginal:268,priceSale:128,imageUrl:`${W}2026/02/Sungboon-Editor-Green-Tomato-NMN-Pore-Lifting-Ampoule-detail-3.jpg`,descriptionZh:"皇牌人氣安瓶，全新升級配方，3D 改善毛孔。",tags:["bestseller"],skinConcerns:["pores","elasticity"],volume:"40ml",rating:4.8,reviewCount:1567,krImages:KR_P019}),
+  p({id:"P020",brand:"CLIO",nameZh:"Sharp So Simple 極細防水眼線筆",nameEn:"Sharp So Simple Waterproof Pencil Liner",slug:"clio-sharp-so-simple-liner",category:"makeup",subcategory:"eye-brow",priceOriginal:120,priceSale:68,imageUrl:`${W}2024/02/clio-Sharp-So-Simple-Waterproof-Pencil-Liner-01-11-cover-1.jpg`,descriptionZh:"CLIO No.1 眼線筆，超纖細 2mm 筆芯設計，持久防水。",tags:["bestseller"],skinConcerns:[],volume:"0.14g",rating:4.9,reviewCount:3245}),
+  p({id:"P021",brand:"OddType",nameZh:"Unseen Blur 軟霧絲絨不沾杯唇釉",nameEn:"Unseen Blur Tint",slug:"oddtype-unseen-blur-tint",category:"makeup",subcategory:"lip",priceOriginal:168,priceSale:128,imageUrl:`${W}2023/09/OddType-Unseen-Blur-Tint-14-colors-cover-1.jpg`,descriptionZh:"小圓平頭暈染唇掃頭，配合軟滑慕絲質地。",tags:["new"],skinConcerns:[],volume:"4g",rating:4.7,reviewCount:892}),
+  p({id:"P022",brand:"Espoir",nameZh:"Pro Tailor Be Velvet Cover 持久絲絨啞緻氣墊粉底",nameEn:"Pro Tailor Be Velvet Cover Cushion",slug:"espoir-pro-tailor-velvet-cushion",category:"makeup",subcategory:"face",priceOriginal:168,priceSale:null,imageUrl:`${W}2023/07/espoir-Protailor-Be-Velvet-Cover-Cushion-New-Class-cover-1.jpg`,descriptionZh:"持久絲絨啞緻氣墊粉底，遮蓋毛孔，妝容自然無瑕。",tags:["bestseller","vegan"],skinConcerns:[],volume:"13g + Refill",rating:4.8,reviewCount:1876,krImages:KR_P022}),
+  p({id:"P023",brand:"NAMING.",nameZh:"Zero Gravity Cover Fit 零重力氣墊粉底",nameEn:"Zero Gravity Cover Fit Cushion",slug:"naming-zero-gravity-cushion",category:"makeup",subcategory:"face",priceOriginal:159,priceSale:104,imageUrl:`${W}2024/09/naming-Zero-Gravity-Cover-Fit-Cushion-cover-1.jpg`,descriptionZh:"蝴蝶區毛孔完美修飾，無重貼薄輕盈底妝。",tags:["bestseller","new"],skinConcerns:[],volume:"13g + Refill",rating:4.7,reviewCount:654}),
+  p({id:"P024",brand:"Espoir",nameZh:"Water Splash 爆水提亮潤色防曬乳霜",nameEn:"Water Splash Sun Cream Ceramide",slug:"espoir-water-splash-sun-cream",category:"skincare",subcategory:"sunscreen",priceOriginal:168,priceSale:118,imageUrl:`${W}2023/03/Espoir-Water-Splash-Sun-Cream-Ceramide-cover-1.jpg`,descriptionZh:"添加 Ceramide 神經酰胺，加強皮膚屏障同保濕能力。",tags:["bestseller"],skinConcerns:["dry"],volume:"60ml",rating:4.7,reviewCount:1124,krImages:KR_P024}),
+  p({id:"P025",brand:"Glossier",nameZh:"Lash Slick 皇牌纖長持久睫毛膏",nameEn:"Lash Slick",slug:"glossier-lash-slick",category:"makeup",subcategory:"eye-brow",priceOriginal:175,priceSale:null,imageUrl:`${W}Lash-Slick-1.jpg`,descriptionZh:"自然增長睫毛，根根分明、自然纖長。",tags:["bestseller"],skinConcerns:[],volume:"8.5g",rating:4.6,reviewCount:432}),
+  p({id:"P026",brand:"The Saem",nameZh:"Cover Perfection 多功能完美遮瑕筆",nameEn:"Cover Perfection Concealer Pencil",slug:"thesaem-cover-perfection-concealer",category:"makeup",subcategory:"face",priceOriginal:42,priceSale:35,imageUrl:`${W}2023/09/the-saem-Cover-Perfection-Concealer-Pencil-cover-1-3.jpg`,descriptionZh:"2025 GlowPick Awards 第一名遮瑕筆。",tags:["bestseller","award-winning"],skinConcerns:[],volume:"1.4g",rating:4.8,reviewCount:2891}),
+  p({id:"P027",brand:"Colorgram",nameZh:"Micro Slim 纖細雙頭眉筆",nameEn:"Micro Slim Brow Pencil",slug:"colorgram-micro-slim-brow-pencil",category:"makeup",subcategory:"eye-brow",priceOriginal:76,priceSale:38,imageUrl:`${W}2025/04/colorgram-Micro-Slim-Brow-Pencil-cover-1.jpg`,descriptionZh:"纖細雙頭眉筆，方便攜帶，持久不脫妝。",tags:["sale"],skinConcerns:[],volume:"0.04g",rating:4.5,reviewCount:256}),
+  p({id:"P028",brand:"twoedit by LUNA",nameZh:"多功能修飾校正雙色遮瑕盤",nameEn:"Skin Cover Conceal Palette",slug:"twoedit-skin-cover-conceal",category:"makeup",subcategory:"face",priceOriginal:54,priceSale:null,imageUrl:`${W}2025/07/DaisoLuna-Skin-Cover-Conceal-Palette-cover.avif`,descriptionZh:"專為亞洲肌膚打造，隨心混合、量膚調色。",tags:["new"],skinConcerns:[],volume:"4g",rating:4.6,reviewCount:178}),
+  p({id:"P029",brand:"moev",nameZh:"Annurcatin 天然蘋果多酚無矽洗髮露",nameEn:"Annurcatin Shampoo",slug:"moev-annurcatin-shampoo",category:"body-hair",subcategory:"hair-care",priceOriginal:116,priceSale:null,imageUrl:`${W}2025/06/moev-Annurcatin-Shampoo-300ml-cover.jpg`,descriptionZh:"100% 自然來源界面活性劑，溫和清潔。",tags:["new"],skinConcerns:[],volume:"300ml",rating:4.7,reviewCount:423}),
+  p({id:"P030",brand:"moss",nameZh:"Hand & Body Lotion 持久療癒芳香潤膚乳液",nameEn:"Hand & Body Lotion Pause",slug:"moss-hand-body-lotion-pause",category:"body-hair",subcategory:"body-care",priceOriginal:310,priceSale:196,imageUrl:`${W}2023/12/Moss-Hand-Body-lotion-pause.jpg`,descriptionZh:"為日常增添香氣體驗，療癒身心。",tags:["bestseller"],skinConcerns:["dry"],volume:"300ml",rating:4.8,reviewCount:567}),
+  p({id:"P031",brand:"Milk Touch",nameZh:"野人參金 PDRN 日常特別面膜",nameEn:"Wild Ginseng Gold PDRN Mask",slug:"milk-touch-wild-ginseng-pdrn-mask",category:"skincare",subcategory:"mask",priceOriginal:268,priceSale:179,imageUrl:`${W}2024/10/Milk-Touch-Wild-Ginseng-Gold-PDRN-Daily-Special-Mask-cover-1.jpg`,descriptionZh:"野人參同 PDRN 成分有效滋潤同修復肌膚。",tags:["new"],skinConcerns:["dry","sensitive"],volume:"30片",rating:4.7,reviewCount:234}),
+  p({id:"P032",brand:"Torhop",nameZh:"桑拿海鹽+綠泥膠原蛋白面膜禮盒",nameEn:"Saunan Heating Salt + Loyly Mud Mask Set",slug:"torhop-saunan-loyly-set",category:"skincare",subcategory:"mask",priceOriginal:258,priceSale:199,imageUrl:`${W}2025/02/Torhop-Gift-Wrapping-Saunan-Heating-Salt-Mask-35g-Loyly-Green-mud-Collagen-Mask-35g-Set-cover-1.jpg`,descriptionZh:"家中一邊 shower 一邊做美肌 SPA。",tags:["sale"],skinConcerns:["pores","oily"],volume:"35g x 2",rating:4.6,reviewCount:189}),
+  p({id:"P033",brand:"WHIPPED",nameZh:"Vegan Pack 天然植萃溫和卸妝潔面乳",nameEn:"Vegan Pack Cleanser",slug:"whipped-vegan-pack-cleanser",category:"skincare",subcategory:"cleanser",priceOriginal:159,priceSale:null,imageUrl:`${W}2025/05/Whipped-Vegan-Pack-Cleanser-cover-1.jpg`,descriptionZh:"潔面、面膜及護理三合一，敏感肌適用。",tags:["vegan"],skinConcerns:["sensitive","dry"],volume:"130g",rating:4.6,reviewCount:145}),
+  p({id:"P034",brand:"ONE THING",nameZh:"Niacinamide Glutathione 5% 維B穀胱甘肽美白爽膚水",nameEn:"Niacinamide Glutathione Toner 5%",slug:"one-thing-niacinamide-toner",category:"skincare",subcategory:"toner",priceOriginal:186,priceSale:138,imageUrl:`${W}2025/01/One-Thing-Niacinamide-Glutathione-Toner-cover-1.jpg`,descriptionZh:"5% Niacinamide + Glutathione，均勻膚色，美白護理。",tags:["bestseller"],skinConcerns:["dark-spots","sensitive"],volume:"210ml",rating:4.7,reviewCount:678,krImages:KR_P034}),
+  p({id:"P035",brand:"numbuzin",nameZh:"No.3 Radiance 酵母提亮去暗沉爽膚棉片",nameEn:"No.3 Radiance Glowing Pad",slug:"numbuzin-no3-radiance-pad",category:"skincare",subcategory:"toner",priceOriginal:198,priceSale:138,imageUrl:`${W}2023/11/numbuzin-No.3-Radiance-Glowing-Jumbo-Essence-Pad-cover-1.jpg`,descriptionZh:"50種氨基酸發酵成份精華，重啟透亮光澤肌。",tags:["bestseller"],skinConcerns:["dullness"],volume:"70片",rating:4.8,reviewCount:1289}),
+  p({id:"P036",brand:"S.Nature",nameZh:"Aqua Oasis 綠洲泛醇保濕舒緩棉片",nameEn:"Aqua Oasis Calming Pad",slug:"snature-aqua-oasis-pad",category:"skincare",subcategory:"toner",priceOriginal:198,priceSale:126,imageUrl:`${W}2024/11/S-NATURE-Aqua-Oasis-Panthe-Allan-Calming-Pad-cover.jpg`,descriptionZh:"D-泛醇 + 尿囊素 + 8 種透明質酸，強效保濕舒緩。",tags:["bestseller"],skinConcerns:["sensitive","dry"],volume:"60片",rating:4.8,reviewCount:945}),
+  /* === New from bulk scrape (P037-P154) === */
+  p({id:"P037",brand:"ANUA",nameZh:"魚腥草70%舒緩保濕面霜",nameEn:"Heartleaf 70 Soothing Cream",slug:"anua-heartleaf-70-cream",category:"skincare",subcategory:"cream",priceOriginal:278,priceSale:184,imageUrl:`${W}2023/10/ANUA-HEARTLEAF-70-SOOTHING-CREAM-cover-1.jpg`,descriptionZh:"高濃度魚腥草舒緩保濕面霜，舒緩肌膚保持水分。",tags:["bestseller"],skinConcerns:["sensitive","dry"],volume:"100ml",rating:4.8,reviewCount:421}),
+  p({id:"P038",brand:"Round Lab",nameZh:"獨島保濕噴霧",nameEn:"1025 Dokdo Mist",slug:"roundlab-dokdo-mist",category:"skincare",subcategory:"mist",priceOriginal:138,priceSale:108,imageUrl:`${W}2023/04/RoundLab-1025-Dokdo-Mist-cover-1.jpg`,descriptionZh:"獨島深海水保濕噴霧，使用後清新舒適。",tags:["bestseller"],skinConcerns:["dry"],volume:"150ml",rating:4.6,reviewCount:312}),
+  p({id:"P039",brand:"Colorgram",nameZh:"Q彈果凍多用途閃亮高光棒",nameEn:"Jelly Glitter Stick",slug:"colorgram-jelly-glitter-stick",category:"makeup",subcategory:"face",priceOriginal:84,priceSale:46,imageUrl:`${W}2025/12/Colorgram-Jelly-Glitter-Stick-cover-1.jpg`,descriptionZh:"果凍般彈潤質地，結合多種閃爍亮粉。",tags:["new"],skinConcerns:[],volume:"8色選擇",rating:4.5,reviewCount:189}),
+  p({id:"P040",brand:"S.Nature",nameZh:"Aqua Oasis 綠洲保濕水凝面霜",nameEn:"Aqua Oasis Moisturizing Gel Cream",slug:"snature-aqua-oasis-cream",category:"skincare",subcategory:"cream",priceOriginal:238,priceSale:154,imageUrl:`${W}2024/11/S-NATURE-Aqua-Oasis-Moisturizing-Gel-Cream-cover-2.jpg`,descriptionZh:"清爽爆水，油痘肌保濕，日夜適用。",tags:["bestseller"],skinConcerns:["oily","sensitive","acne"],volume:"80ml",rating:4.7,reviewCount:543}),
+  p({id:"P041",brand:"Mom Bath Recipe",nameZh:"身體拋光去死皮角質沖涼包",nameEn:"Body Peeling Pad",slug:"mom-bath-body-peeling-pad",category:"body-hair",subcategory:"body-care",priceOriginal:118,priceSale:null,imageUrl:`${W}2023/02/Mom-Bath-Recipe-body-peeling-pad-cover-1.jpg`,descriptionZh:"夏天必備，洗走身體暗粒和粗糙感。",tags:["bestseller"],skinConcerns:[],volume:"30ml x 8pcs",rating:4.6,reviewCount:267}),
+  p({id:"P042",brand:"Abib",nameZh:"魚腥草溫和清爽不泛白防曬",nameEn:"Heartleaf Mild Sunscreen",slug:"abib-heartleaf-sunscreen",category:"skincare",subcategory:"sunscreen",priceOriginal:176,priceSale:116,imageUrl:`${W}2025/04/abib-heartleaf-mild-suncream-cover.jpg`,descriptionZh:"SPF 50+ PA++++，敏感肌設計，輕薄貼合。",tags:["sale","new"],skinConcerns:["sensitive"],volume:"50ml",rating:4.7,reviewCount:432}),
+  p({id:"P043",brand:"NAMING.",nameZh:"NAMING X NCT NM Fluffy Baked Highlighter",nameEn:"Fluffy Baked Highlighter",slug:"naming-fluffy-baked-highlighter",category:"makeup",subcategory:"face",priceOriginal:128,priceSale:76,imageUrl:`${W}2025/11/Naming-X-NCT-NM.-Fluffy-Baked-Highlighter-civer-1.jpg`,descriptionZh:"靈感來自自然與光芒，自然閃耀效果。",tags:["new"],skinConcerns:[],volume:"5色選擇",rating:4.6,reviewCount:223}),
+  p({id:"P044",brand:"Medicube",nameZh:"PDRN 粉紅膠原蛋白膠囊面霜",nameEn:"PDRN Pink Collagen Capsule Cream",slug:"medicube-pdrn-pink-collagen",category:"skincare",subcategory:"cream",priceOriginal:248,priceSale:158,imageUrl:`${W}2025/05/medicube-PDRN-Pink-Collagen-Capsule-Cream-detail-1.jpg`,descriptionZh:"高濃縮 PDRN 與 5% Niacinamide，改善膚色潔淨度。",tags:["bestseller","sale"],skinConcerns:["dark-spots","dullness"],volume:"55g",rating:4.8,reviewCount:1102}),
+  p({id:"P045",brand:"Wellage",nameZh:"Real Hyaluronic One Day Kit 急救保濕",nameEn:"Real Hyaluronic One Day Kit",slug:"wellage-one-day-kit",category:"skincare",subcategory:"serum",priceOriginal:48,priceSale:32,imageUrl:`${W}2023/10/Wellage-Real-Hyaluronic-One-Day-Kit-cover.jpeg`,descriptionZh:"水潤彈滑，一粒等於10片面膜！",tags:["bestseller","sale"],skinConcerns:["dry"],volume:"15mg+1ml",rating:4.7,reviewCount:889}),
+  p({id:"P046",brand:"Etude House",nameZh:"防水防油眼線液筆",nameEn:"Line Fix Brush Liner",slug:"etude-line-fix-brush-liner",category:"makeup",subcategory:"eye-brow",priceOriginal:118,priceSale:79,imageUrl:`${W}2023/12/etude-house-Line-Fix-Brush-Liner-cover-1.jpg`,descriptionZh:"防水防油，持久不暈染。",tags:["sale"],skinConcerns:[],volume:"0.1g",rating:4.5,reviewCount:298}),
+  p({id:"P047",brand:"FATION",nameZh:"Nosca9 淨痘舒緩面膜",nameEn:"Nosca9 Trouble Serum Mask",slug:"fation-nosca9-trouble-mask",category:"skincare",subcategory:"mask",priceOriginal:20,priceSale:null,imageUrl:`${W}2024/12/FATION-Nosca9-Trouble-Serum-Mask-cover-1.jpg`,descriptionZh:"東亞藥廠出品，敏感肌專用高效舒緩面膜。",tags:["new"],skinConcerns:["acne","sensitive"],volume:"25ml/pc",rating:4.4,reviewCount:156}),
+  p({id:"P048",brand:"BBIA",nameZh:"啞光單色胭脂膏",nameEn:"Ready To Wear Downy Cheek",slug:"bbia-downy-cheek",category:"makeup",subcategory:"face",priceOriginal:79,priceSale:56,imageUrl:`${W}2026/04/BBIA-Ready-To-Wear-Downy-Cheek-01-13-cover-2.jpg`,descriptionZh:"質地柔滑，多種顏色選擇。",tags:["new"],skinConcerns:[],volume:"3.5g",rating:4.5,reviewCount:178}),
+  p({id:"P049",brand:"Glossier",nameZh:"Generation G 霧面啞光唇膏",nameEn:"Generation G",slug:"glossier-generation-g",category:"makeup",subcategory:"lip",priceOriginal:185,priceSale:null,imageUrl:`${W}Generation-G-1-Zip.jpg`,descriptionZh:"上色自然，潤唇膏般順滑，啞緻霧感。",tags:["bestseller"],skinConcerns:[],volume:"3g",rating:4.7,reviewCount:567}),
+  p({id:"P050",brand:"AOU",nameZh:"Dewy Bar 多用途水潤唇頰兩用棒",nameEn:"AOU Dewy Bar",slug:"aou-dewy-bar",category:"makeup",subcategory:"lip",priceOriginal:128,priceSale:108,imageUrl:`${W}2025/10/AOU-Dewy-Bar-cover.jpg`,descriptionZh:"質地清爽無黏膩，自然柔亮光澤。",tags:["new"],skinConcerns:[],volume:"5g",rating:4.6,reviewCount:189}),
+  p({id:"P051",brand:"d'Alba",nameZh:"白松露雙層精華噴霧",nameEn:"First Spray Serum",slug:"dalba-first-spray-serum",category:"skincare",subcategory:"mist",priceOriginal:468,priceSale:339,imageUrl:`${W}2026/02/dalba-first-spray-serum-11-set-cover.jpg`,descriptionZh:"意大利白松露，迅速補水提亮肌膚。",tags:["bestseller"],skinConcerns:["dry","sensitive"],volume:"100ml",rating:4.8,reviewCount:723}),
+  p({id:"P052",brand:"VT",nameZh:"Pro Cica Reedle Shot 100 微針精華",nameEn:"Pro Cica Reedle Shot 100",slug:"vt-pro-cica-reedle-shot-100",category:"skincare",subcategory:"serum",priceOriginal:348,priceSale:258,imageUrl:`${W}2024/09/VT-Pro-Cica-Reedle-Shot-100-cover-1.jpg`,descriptionZh:"韓國大熱家用式微針精華，舒緩敏感、痘痘護理。",tags:["bestseller"],skinConcerns:["sensitive","acne"],volume:"50ml",rating:4.7,reviewCount:1234}),
+  p({id:"P053",brand:"WakeMake",nameZh:"日間濃黑睫毛精華美睫安瓶",nameEn:"Strong Black Tinting Lash Ampoule",slug:"wakemake-lash-ampoule",category:"makeup",subcategory:"eye-brow",priceOriginal:118,priceSale:72,imageUrl:`${W}2024/02/wakemake-24AD-Strong-Black-Tinting-Lash-Ampoule-cover-2.jpg`,descriptionZh:"增強睫毛濃密感，柔軟有光澤。",tags:["sale"],skinConcerns:[],volume:"10ml",rating:4.5,reviewCount:267}),
+  p({id:"P054",brand:"Ariul",nameZh:"極淨舒壓眼唇卸妝水",nameEn:"Stress Relieving Micellar Lip and Eye Remover",slug:"ariul-stress-relieving-remover",category:"skincare",subcategory:"cleanser",priceOriginal:48,priceSale:null,imageUrl:`${W}2023/02/Ariul-Stress-Relieving-Micellar-Lip-And-Eye-Remover-cover-1.jpg`,descriptionZh:"7:3黃金水油比例，卸除濃妝低敏不刺眼。",tags:["new"],skinConcerns:["sensitive"],volume:"100ml",rating:4.6,reviewCount:298}),
+  p({id:"P055",brand:"innisfree",nameZh:"控油霧面啞光提亮防曬兩支裝",nameEn:"Tone Up No Sebum Sunscreen EX",slug:"innisfree-tone-up-sunscreen",category:"skincare",subcategory:"sunscreen",priceOriginal:198,priceSale:158,imageUrl:`${W}2025/05/600.jpg`,descriptionZh:"高效防曬力，乾爽控油適合油性肌。",tags:["bestseller"],skinConcerns:["oily"],volume:"35ml x 2",rating:4.6,reviewCount:823}),
+  p({id:"P056",brand:"Viseart",nameZh:"4色果仁糖迷你眼影盤",nameEn:"Petits Fours Praline",slug:"viseart-petits-fours-praline",category:"makeup",subcategory:"eye-brow",priceOriginal:185,priceSale:148,imageUrl:`${W}Petits-Fours-Praline-1.jpg`,descriptionZh:"法式小甜點靈感，霧面同珠光眼影。",tags:["bestseller"],skinConcerns:[],volume:"4色",rating:4.8,reviewCount:412}),
+  p({id:"P057",brand:"HOLIKA HOLIKA",nameZh:"My Fave Mood Eye Palette 9色眼影盤",nameEn:"My Fave Mood Eye Palette",slug:"holika-fave-mood-palette",category:"makeup",subcategory:"eye-brow",priceOriginal:228,priceSale:139,imageUrl:`${W}2025/06/Holika-Holika-My-Fave-Mood-Eye-Palette-13-almost-grape-cover-1.jpg`,descriptionZh:"2025年GlowPick最佳眼影盤獎，9種顏色適合各種妝容。",tags:["award-winning"],skinConcerns:[],volume:"9色",rating:4.7,reviewCount:589}),
+  p({id:"P058",brand:"BBIA",nameZh:"杏子系列單色胭脂",nameEn:"Ready To Wear Powder Cheek",slug:"bbia-powder-cheek-apricot",category:"makeup",subcategory:"face",priceOriginal:108,priceSale:66,imageUrl:`${W}2023/04/BBIA-READY-TO-WEAR-POWDER-CHEEK-cover-1.jpg`,descriptionZh:"BBIA最新系列，杏子色調適合日常妝容。",tags:["sale"],skinConcerns:[],volume:"3色選擇",rating:4.5,reviewCount:312}),
+  p({id:"P059",brand:"WakeMake",nameZh:"水波漸變修容",nameEn:"Mix Blurring Volume Shading",slug:"wakemake-mix-blurring-shading",category:"makeup",subcategory:"face",priceOriginal:64,priceSale:null,imageUrl:`${W}2022/12/WakeMake-Mix-Blurring-Volume-Shading-25ad-cover-1.jpg`,descriptionZh:"3色漸層色調，輕鬆搞掂全面輪廓修容。",tags:["bestseller"],skinConcerns:[],volume:"3色",rating:4.6,reviewCount:523}),
+  p({id:"P060",brand:"Ariul",nameZh:"快速卸妝油棉片",nameEn:"The Perfect Cleansing Oil Pads EX",slug:"ariul-cleansing-oil-pads",category:"skincare",subcategory:"cleanser",priceOriginal:148,priceSale:96,imageUrl:`${W}2025/03/Ariul-The-Perfect-Cleansing-Oil-Pads-EX-cover-1.jpg`,descriptionZh:"結合多種植物成分，提供舒適有效潔淨體驗。",tags:["sale"],skinConcerns:["sensitive"],volume:"60片",rating:4.6,reviewCount:445}),
+  p({id:"P061",brand:"Ongredients",nameZh:"魚腥草95%淨透水潤面膜",nameEn:"Houttuynia Cordata 95% Mask",slug:"ongredients-heartleaf-mask",category:"skincare",subcategory:"mask",priceOriginal:36,priceSale:null,imageUrl:`${W}2023/02/ongredients-Houttuynia-Cordata-95-Mask-cover-1.jpg`,descriptionZh:"95%魚腥草成分，舒緩保濕清新水潤。",tags:["new"],skinConcerns:["sensitive","dry"],volume:"5片裝",rating:4.5,reviewCount:178}),
+  p({id:"P062",brand:"isntree",nameZh:"透明質酸保濕防曬霜",nameEn:"Hyaluronic Acid Natural Sun Cream",slug:"isntree-ha-sun-cream",category:"skincare",subcategory:"sunscreen",priceOriginal:168,priceSale:108,imageUrl:`${W}2023/10/isntree-Hyaluronic-Acid-Natural-Sun-Cream-cover-1.jpg`,descriptionZh:"透明質酸有效保濕，輕盈質地不油膩。",tags:["sale"],skinConcerns:["dry","sensitive"],volume:"50ml",rating:4.7,reviewCount:687}),
+  p({id:"P063",brand:"dasique",nameZh:"冷調草莓奶昔眼影盤",nameEn:"Shadow Palette 18 Berry Smoothie",slug:"dasique-berry-smoothie-palette",category:"makeup",subcategory:"eye-brow",priceOriginal:255,priceSale:198,imageUrl:`${W}2023/03/dasique-Shadow-Palette-18-Berry-Smoothie-cover-1.jpg`,descriptionZh:"冷皮設計，色彩由清淡冷粉到亮紫色。",tags:["bestseller"],skinConcerns:[],volume:"7g",rating:4.8,reviewCount:892}),
+  p({id:"P064",brand:"Round Lab",nameZh:"獨島卸妝油",nameEn:"1025 Dokdo Cleansing Oil",slug:"roundlab-dokdo-cleansing-oil",category:"skincare",subcategory:"cleanser",priceOriginal:178,priceSale:138,imageUrl:`${W}2025/01/Round-Lab-1025-Dokdo-Cleansing-Oil-cover-1.jpg`,descriptionZh:"深入清潔肌膚，去除殘餘化妝品。",tags:["bestseller"],skinConcerns:["dry"],volume:"200ml",rating:4.7,reviewCount:534}),
+  p({id:"P065",brand:"Etude",nameZh:"Daiso x Etude 透亮輕盈定妝散粉",nameEn:"Finish Loose Powder",slug:"etude-finish-loose-powder",category:"makeup",subcategory:"face",priceOriginal:48,priceSale:36,imageUrl:`${W}2025/03/Daiso-x-Etude-Finish-Loose-Powder-cover.jpg`,descriptionZh:"輕盈自然質地，透亮無瑕妝感。",tags:["sale","new"],skinConcerns:[],volume:"2色選擇",rating:4.5,reviewCount:201}),
+  p({id:"P066",brand:"Round Lab",nameZh:"黑豆泛醇B5深層保濕面霜",nameEn:"Soybean Panthenol Cream",slug:"roundlab-soybean-cream",category:"skincare",subcategory:"cream",priceOriginal:258,priceSale:189,imageUrl:`${W}2024/12/Round-Lab-Soybean-Panthenol-Cream-cover-1.jpg`,descriptionZh:"120小時長效保濕，強化肌膚屏障。",tags:["bestseller"],skinConcerns:["dry","sensitive"],volume:"80ml",rating:4.8,reviewCount:945}),
+  p({id:"P067",brand:"AMUSE",nameZh:"豐唇鑽石閃亮純素唇蜜",nameEn:"Lip Fuller Big Diamond",slug:"amuse-lip-fuller-diamond",category:"makeup",subcategory:"lip",priceOriginal:158,priceSale:86,imageUrl:`${W}2024/03/AMUSE-LIP-FULLER-BIG-DIAMOND-cover-1.jpg`,descriptionZh:"清透基底色，亮粉金光，涼爽豐唇效果。",tags:["sale","vegan"],skinConcerns:[],volume:"3.8g",rating:4.6,reviewCount:367}),
+  p({id:"P068",brand:"EltaMD",nameZh:"溫和泡沫潔面乳",nameEn:"Foaming Facial Cleanser",slug:"eltamd-foaming-cleanser",category:"skincare",subcategory:"cleanser",priceOriginal:120,priceSale:null,imageUrl:`${W}2020/02/eltamd-014.jpg`,descriptionZh:"溫和無油，有效卸除彩妝及油脂。",tags:["bestseller"],skinConcerns:["sensitive","oily","acne"],volume:"207ml",rating:4.7,reviewCount:678}),
+  p({id:"P069",brand:"Snow Fox",nameZh:"日本清酒益生菌保濕養膚面膜",nameEn:"Pre+Probiotic Sake Mask",slug:"snowfox-sake-mask",category:"skincare",subcategory:"mask",priceOriginal:340,priceSale:null,imageUrl:`${W}2021/12/snowfox-PreProbiotic-Sake-Mask.jpg`,descriptionZh:"日本清酒發酵技術，保濕修復敏感肌。",tags:["bestseller"],skinConcerns:["sensitive","dry"],volume:"5片",rating:4.8,reviewCount:445}),
+  p({id:"P070",brand:"CLIO",nameZh:"Shade & Shadow 12色妝容綜合眼影盤",nameEn:"Shade & Shadow Palette 12 Colors",slug:"clio-shade-shadow-palette",category:"makeup",subcategory:"eye-brow",priceOriginal:309,priceSale:178,imageUrl:`${W}2022/10/CLIO-SHADE-SHADOW-PALETTE-cover-1-1.jpg`,descriptionZh:"多種質地眼影、胭脂、高光，適合新手。",tags:["bestseller","award-winning"],skinConcerns:[],volume:"12色",rating:4.8,reviewCount:1234}),
+  p({id:"P071",brand:"CLIO",nameZh:"Kill Cover Airy Fit 豐盈輕薄遮瑕液",nameEn:"Kill Cover Airy Fit Concealer",slug:"clio-airy-fit-concealer",category:"makeup",subcategory:"face",priceOriginal:96,priceSale:64,imageUrl:`${W}2025/09/CLIO-KILL-COVER-AIRY-FIT-CONCEALER-cover.webp`,descriptionZh:"極致輕盈貼合，光滑無瑕膚色。",tags:["new"],skinConcerns:[],volume:"6色選擇",rating:4.6,reviewCount:312}),
+  p({id:"P072",brand:"rom&nd",nameZh:"果汁玻璃水光唇釉",nameEn:"Juicy Lasting Tint",slug:"romand-juicy-lasting-tint",category:"makeup",subcategory:"lip",priceOriginal:94,priceSale:68,imageUrl:`${W}2021/05/juicy-juicy-lasting-tint-22-25-cover-1.jpg`,descriptionZh:"持久保濕，水潤光澤雙唇。",tags:["bestseller"],skinConcerns:[],volume:"5.5g",rating:4.8,reviewCount:1567}),
+  p({id:"P073",brand:"WakeMake",nameZh:"水感持久水光純素粉底液",nameEn:"Water Glow Coating Foundation",slug:"wakemake-water-glow-foundation",category:"makeup",subcategory:"face",priceOriginal:146,priceSale:null,imageUrl:`${W}2024/01/Wakemake-Water-Glow-Coating-Foundation-cover-1.jpg`,descriptionZh:"輕薄水潤質地，光澤持久如coating。",tags:["new","vegan"],skinConcerns:["dry"],volume:"30ml",rating:4.6,reviewCount:234}),
+  p({id:"P074",brand:"BIO HEAL BOH",nameZh:"維他命透明質酸保濕面霜套裝",nameEn:"Vitamin Hyaluronic Gel Cream Set",slug:"bioheal-vitamin-cream-set",category:"skincare",subcategory:"cream",priceOriginal:228,priceSale:67,imageUrl:`${W}2025/04/bioheal-boh-Vitamin-Hyaluronic-Gel-Cream-70ml-30ml-cover-1.jpg`,descriptionZh:"12種維他命同透明質酸，水潤光滑肌膚。",tags:["sale"],skinConcerns:["dry"],volume:"70ml + 30ml",rating:4.5,reviewCount:189}),
+  p({id:"P075",brand:"CLIO",nameZh:"Kill Cover Founwear 三重遮瑕氣墊",nameEn:"Kill Cover Founwear Cushion",slug:"clio-founwear-cushion",category:"makeup",subcategory:"face",priceOriginal:80,priceSale:null,imageUrl:`${W}2025/10/CLIO-KILL-COVER-FOUNWEAR-CUSHION-SET-19N-PORCELAIN-SPF50-PA-detail-6.jpg`,descriptionZh:"全天候無瑕遮蓋，妝容持久透亮。",tags:["bestseller"],skinConcerns:[],volume:"5色選擇",rating:4.7,reviewCount:678}),
+  p({id:"P076",brand:"Medi-Peel",nameZh:"乳酸菌X膠原蛋白收毛孔緊緻面膜",nameEn:"Red Lacto Collagen Pore Lifting Mask",slug:"medipeel-red-lacto-mask",category:"skincare",subcategory:"mask",priceOriginal:158,priceSale:118,imageUrl:`${W}2025/02/MEDIPEEL-RED_LACTO_COLLAGEN_PORE_LIFTING_MASK-cover.jpeg`,descriptionZh:"改善肌膚鬆弛與毛孔，高度濃縮乳酸菌與膠原。",tags:["sale"],skinConcerns:["pores","elasticity"],volume:"30ml/片",rating:4.6,reviewCount:412}),
+  p({id:"P077",brand:"BRAYE",nameZh:"全銀型格唇頰兩用霧面唇霜",nameEn:"Lipsleek Blur",slug:"braye-lipsleek-blur",category:"makeup",subcategory:"lip",priceOriginal:178,priceSale:98,imageUrl:`${W}2024/09/braye-LIPSLEEK-BLUR-cover-1.jpg`,descriptionZh:"超型格小眾品牌，多用途唇膏輕巧易用。",tags:["sale","new"],skinConcerns:[],volume:"21.78g",rating:4.5,reviewCount:178}),
+  p({id:"P078",brand:"ilso",nameZh:"超級莓果山桑子舒緩降溫保濕防曬",nameEn:"Bilberry Cool Calming Sun Cream",slug:"ilso-bilberry-sunscreen",category:"skincare",subcategory:"sunscreen",priceOriginal:128,priceSale:84,imageUrl:`${W}2025/05/ilso-Bilberry-Cool-Calming-Moisture-Sun-Screen-cover.jpg`,descriptionZh:"低過敏性清涼防曬霜，降溫舒緩。",tags:["sale"],skinConcerns:["sensitive"],volume:"50ml",rating:4.6,reviewCount:289}),
+  p({id:"P079",brand:"oenir",nameZh:"輕透水潤水光唇膏",nameEn:"Our Glow Lip",slug:"oenir-our-glow-lip",category:"makeup",subcategory:"lip",priceOriginal:102,priceSale:null,imageUrl:`${W}2023/02/oenir-Our-Glow-Lip-cover-1.jpg`,descriptionZh:"韓國小眾品牌，水潤亮澤唇膏。",tags:["bestseller"],skinConcerns:[],volume:"3.3g",rating:4.7,reviewCount:445}),
+  p({id:"P080",brand:"SKINFOOD",nameZh:"黑糖光采卸妝油",nameEn:"Black Sugar Perfect Cleansing Oil",slug:"skinfood-black-sugar-oil",category:"skincare",subcategory:"cleanser",priceOriginal:265,priceSale:118,imageUrl:`${W}2022/07/SkinFood-Black-Sugar-Perfect-Cleansing-Oil-23ad-cover-2.jpg`,descriptionZh:"有效清潔肌膚，輕鬆卸除妝容保濕。",tags:["sale"],skinConcerns:["dry"],volume:"200ml",rating:4.7,reviewCount:567}),
+  p({id:"P081",brand:"Round Lab",nameZh:"白樺樹保濕潔面乳",nameEn:"Birch Juice Moisturizing Cleanser",slug:"roundlab-birch-cleanser",category:"skincare",subcategory:"cleanser",priceOriginal:128,priceSale:79,imageUrl:`${W}2025/05/round-lab-BIRCH-JUICE-MOISTURIZING-CLEANSER_150ml-cover.jpg`,descriptionZh:"溫和潔淨，含白樺樹汁與維他命C。",tags:["bestseller"],skinConcerns:["dry","sensitive"],volume:"150ml",rating:4.6,reviewCount:312}),
+  p({id:"P082",brand:"numbuzin",nameZh:"No.9 NAD+ 視黃醇眼霜",nameEn:"No.9 NAD+ Retinol Eye Cream",slug:"numbuzin-no9-nad-eye-cream",category:"skincare",subcategory:"eye-care",priceOriginal:176,priceSale:126,imageUrl:`${W}2025/07/numbuzin-No.9-NAD-Retinol-Volumetox-Eye-Cream-cover.jpg`,descriptionZh:"提拉緊緻下垂眼周，回復彈性年輕。",tags:["new"],skinConcerns:["dark-circles","wrinkles"],volume:"30ml",rating:4.7,reviewCount:234}),
+  p({id:"P083",brand:"FATION",nameZh:"Nosca9 淨痘鎮靜潔面乳",nameEn:"Nosca9 Trouble Cleansing Foam",slug:"fation-nosca9-cleanser",category:"skincare",subcategory:"cleanser",priceOriginal:168,priceSale:78,imageUrl:`${W}2024/10/FATION-Nosca9-Trouble-Cleansing-Foam-cover-1.jpg`,descriptionZh:"專為痘痘肌設計，清潔同時舒緩。",tags:["sale"],skinConcerns:["acne","sensitive"],volume:"150ml",rating:4.5,reviewCount:198}),
+  p({id:"P084",brand:"ColourPop",nameZh:"Cream Soda 4色迷你祼粉眼影盤",nameEn:"Cream Soda 4-Color Mini Palette",slug:"colourpop-cream-soda",category:"makeup",subcategory:"eye-brow",priceOriginal:98,priceSale:89,imageUrl:`${W}cream-soda-1.jpg`,descriptionZh:"柔和祼淡粉色調，柔和眼神效果。",tags:["sale"],skinConcerns:[],volume:"4色",rating:4.5,reviewCount:223}),
+  p({id:"P085",brand:"Care Plus",nameZh:"水楊酸微針消痘暗瘡貼",nameEn:"Salicylic Acid Trouble Patch",slug:"careplus-salicylic-patch",category:"skincare",subcategory:"mask",priceOriginal:64,priceSale:null,imageUrl:`${W}2024/10/Care-Plus-Salicylic-Acid-Trouble-Patch-12P-cover-2.jpg`,descriptionZh:"微針有效成分深入肌膚，改善痘痘黑頭。",tags:["new"],skinConcerns:["acne","blackheads"],volume:"12片裝",rating:4.6,reviewCount:267}),
+  p({id:"P086",brand:"Etude House",nameZh:"雲朶濾鏡柔軟霧面氣墊粉底",nameEn:"Cloud Filter Cushion SPF42",slug:"etude-cloud-filter-cushion",category:"makeup",subcategory:"face",priceOriginal:176,priceSale:78,imageUrl:`${W}2025/03/etude-Cloud-Filter-Cushion-cover-1.jpg`,descriptionZh:"持久妝效透亮肌膚，SPF42防曬。",tags:["sale"],skinConcerns:[],volume:"15g",rating:4.6,reviewCount:445}),
+  p({id:"P087",brand:"CLIO",nameZh:"Stay Perfect 完美修飾定妝蜜粉餅",nameEn:"Stay Perfect Finish Pact",slug:"clio-stay-perfect-pact",category:"makeup",subcategory:"face",priceOriginal:219,priceSale:142,imageUrl:`${W}2022/05/clio-stay-perfect-finish-pact-cover-2.jpg`,descriptionZh:"輕柔透明粉末，自然細滑修飾毛孔。",tags:["bestseller"],skinConcerns:["pores"],volume:"8g",rating:4.7,reviewCount:892}),
+  p({id:"P088",brand:"Sungboon Editor",nameZh:"Deep Collagen Power Boosting 抗皺果凍面膜",nameEn:"Deep Collagen Power Boosting Mask",slug:"sungboon-deep-collagen-power",category:"skincare",subcategory:"mask",priceOriginal:128,priceSale:38,imageUrl:`${W}2025/04/Sungboon-Editor-Deep-Collagen-Power-Boosting-Mask-cover-2.jpg`,descriptionZh:"216萬ppb膠原蛋白，肌膚緊緻透明。",tags:["sale","award-winning"],skinConcerns:["wrinkles","elasticity"],volume:"37g x 4pcs",rating:4.7,reviewCount:678}),
+  p({id:"P089",brand:"HEVE BLUE",nameZh:"牛奶米脂體注射美白面霜",nameEn:"Milk Rice Liposome Whitening Cream",slug:"heveblue-milk-rice-cream",category:"skincare",subcategory:"cream",priceOriginal:298,priceSale:168,imageUrl:`${W}2023/12/HeveBlue-Milk-Rice-Liposome-Shot-Whitening-Cream-cover-2.jpg`,descriptionZh:"溫和不刺激，淡化黑色素均勻膚色。",tags:["bestseller"],skinConcerns:["dark-spots","dullness"],volume:"55ml",rating:4.6,reviewCount:445}),
+  p({id:"P090",brand:"Wellage",nameZh:"超胜肽肉毒桿菌毛孔緊緻繃帶霜",nameEn:"Hyper Peptide Bandage Cream",slug:"wellage-peptide-bandage-cream",category:"skincare",subcategory:"cream",priceOriginal:198,priceSale:128,imageUrl:`${W}2024/12/Wellage-Hyper-Peptide-Bandage-Cream-cover-2.jpeg`,descriptionZh:"提拉緊緻毛孔，提升肌膚彈性。",tags:["bestseller"],skinConcerns:["pores","elasticity"],volume:"50ml",rating:4.7,reviewCount:567}),
+  p({id:"P091",brand:"numbuzin",nameZh:"No.1 泛酸維B5透明質酸保濕面膜",nameEn:"No.1 Pantothenic B5 Hyaluronic Mask",slug:"numbuzin-no1-pantothenic-mask",category:"skincare",subcategory:"mask",priceOriginal:78,priceSale:18,imageUrl:`${W}2025/05/numbuzinMask_No.1-Pantothenic-B5-Hyaluronic-Active-Clear-Mask-4P-detail-2.jpg`,descriptionZh:"紗布材質，遇精華變成濃稠果凍凝膠。",tags:["sale","new"],skinConcerns:["dry","oily"],volume:"27ml",rating:4.5,reviewCount:189}),
+  p({id:"P092",brand:"Dr. G",nameZh:"溫和淨肌煥白去角質保濕啫喱",nameEn:"Brightening Peeling Gel",slug:"drg-brightening-peeling-gel",category:"skincare",subcategory:"cleanser",priceOriginal:148,priceSale:115,imageUrl:`${W}2022/09/drg-Brightening-Peeling-Gel-cover-2.jpg`,descriptionZh:"溫和去除角質，肌膚明亮水潤。",tags:["bestseller"],skinConcerns:["dullness","sensitive"],volume:"120g",rating:4.7,reviewCount:734}),
+  p({id:"P093",brand:"CLIO",nameZh:"Kill Cover Founwear 72小時持久遮瑕液",nameEn:"Kill Cover Founwear Concealer",slug:"clio-founwear-concealer",category:"makeup",subcategory:"face",priceOriginal:128,priceSale:84,imageUrl:`${W}2023/06/CLIO-Kill-Cover-Founwear-Foundation-Concealer-cover-1.jpg`,descriptionZh:"高遮瑕度輕盈貼服，粉質細緻持久不脫妝。",tags:["bestseller"],skinConcerns:[],volume:"6g",rating:4.7,reviewCount:589}),
+  p({id:"P094",brand:"About Tone",nameZh:"柔霧調色定妝粉餅",nameEn:"The Blur Powder Pact",slug:"abouttone-blur-powder-pact",category:"makeup",subcategory:"face",priceOriginal:178,priceSale:109,imageUrl:`${W}2024/10/About-Tone-The-Blur-Powder-Pact-cover-1.jpg`,descriptionZh:"自然美肌濾鏡，幼細粉末修飾毛孔紋理。",tags:["bestseller"],skinConcerns:["pores"],volume:"3色選擇",rating:4.7,reviewCount:412}),
+  p({id:"P095",brand:"NAMING.",nameZh:"NAMING X Jinyaa Zero Gravity 氣墊粉底",nameEn:"NAMING X Jinyaa Zero Gravity Cushion",slug:"naming-jinyaa-zero-gravity",category:"makeup",subcategory:"face",priceOriginal:218,priceSale:119,imageUrl:`${W}2025/12/NAMING-X-Jinyaa-Zero-Gravity-Cover-Cushion-cover-1.jpg`,descriptionZh:"遮蓋毛孔瑕疵，瓷器般光滑肌膚。",tags:["sale","new"],skinConcerns:["pores"],volume:"12g",rating:4.7,reviewCount:289}),
+  p({id:"P096",brand:"Sungboon Editor",nameZh:"Deep Collagen Hyalu-B5 保濕面膜",nameEn:"Deep Collagen Hyalu-B5 Hydrating Mask",slug:"sungboon-hyalu-b5-mask",category:"skincare",subcategory:"mask",priceOriginal:128,priceSale:null,imageUrl:`${W}2026/01/Sungboon-Editor-Deep-Collagen-Hyalu-B5-Hydrating-Mask-cover-1.jpg`,descriptionZh:"低分子膠原+透明質酸，深層補濕水潤彈性。",tags:["new"],skinConcerns:["dry","fine-lines"],volume:"37g/pc",rating:4.6,reviewCount:178}),
+  p({id:"P097",brand:"ColourPop",nameZh:"Juniper 咖啡色帶閃眼線筆",nameEn:"Juniper Liner Crème Gel",slug:"colourpop-juniper-liner",category:"makeup",subcategory:"eye-brow",priceOriginal:64,priceSale:null,imageUrl:`${W}Juniper-Liner-1.jpg`,descriptionZh:"閃粉咖啡色眼線膠筆，柔和顯色。",tags:["bestseller"],skinConcerns:[],volume:"0.2g",rating:4.5,reviewCount:267}),
+  p({id:"P098",brand:"TAG",nameZh:"TAG x Too Cool For School 空氣感染眉膏",nameEn:"Air Fixing Brow Cara",slug:"tag-too-cool-brow-cara",category:"makeup",subcategory:"eye-brow",priceOriginal:59,priceSale:54,imageUrl:`${W}2025/06/TAG-X-Too-Cool-For-School-Air-Fixing-Brow-Cara-cover-1.jpg`,descriptionZh:"空氣般輕盈，立體眉妝持久不脫。",tags:["new"],skinConcerns:[],volume:"2色選擇",rating:4.6,reviewCount:234}),
+  p({id:"P099",brand:"Wakemake",nameZh:"細緻刷頭粉霧不反光染眉膏",nameEn:"Real Fixing Slim Browcara",slug:"wakemake-slim-browcara",category:"makeup",subcategory:"eye-brow",priceOriginal:108,priceSale:59,imageUrl:`${W}2026/03/Wakemake-Real-Fixing-Slim-Browcara-cover-1.jpg`,descriptionZh:"粉霧感定色配方，自然貼合眉色。",tags:["sale","new"],skinConcerns:[],volume:"5色選擇",rating:4.5,reviewCount:189}),
+  p({id:"P100",brand:"SKINFOOD",nameZh:"全草本薰衣草保濕舒敏果凍面膜",nameEn:"Food Mask Lavender",slug:"skinfood-food-mask-lavender",category:"skincare",subcategory:"mask",priceOriginal:128,priceSale:89,imageUrl:`${W}2023/04/skinfood-Food-Mask-Lavender-cover.jpg`,descriptionZh:"深層保濕舒緩減壓，敏感肌適用。",tags:["sale"],skinConcerns:["sensitive","dry"],volume:"120g",rating:4.5,reviewCount:298}),
+  p({id:"P101",brand:"Some By Mi",nameZh:"30天奇蹟亮白淡斑修護柚子精華",nameEn:"Yuja Niacin 30 Days Blemish Care Serum",slug:"somebymi-yuja-niacin-serum",category:"skincare",subcategory:"serum",priceOriginal:300,priceSale:118,imageUrl:`${W}2022/01/somebymi-yuja-niacin-serum.jpg`,descriptionZh:"天然柚子果皮精油，淡化斑點明亮膚色。",tags:["bestseller","sale"],skinConcerns:["dark-spots"],volume:"50ml",rating:4.7,reviewCount:892}),
+  p({id:"P102",brand:"Mario Badescu",nameZh:"金縷梅玫瑰水抗氧爽膚水",nameEn:"Witch Hazel & Rosewater Toner",slug:"mariobadescu-witch-hazel-toner",category:"skincare",subcategory:"toner",priceOriginal:129,priceSale:null,imageUrl:`${W}2020/03/Witch-Hazel-Rosewater-Toner-1.jpg`,descriptionZh:"不含酒精，金縷梅天然收斂收細毛孔。",tags:["bestseller"],skinConcerns:["pores","sensitive"],volume:"236ml",rating:4.6,reviewCount:567}),
+  p({id:"P103",brand:"Wellage",nameZh:"Real Cica Calming 95 積雪草舒緩鎮靜面霜",nameEn:"Real Cica Calming 95 Cream",slug:"wellage-real-cica-cream",category:"skincare",subcategory:"cream",priceOriginal:208,priceSale:98,imageUrl:`${W}2023/12/Wellage-Real-Cica-Calming-95-Cream-cover-1.jpg`,descriptionZh:"95%積雪草精華，迅速修復強化屏障。",tags:["bestseller"],skinConcerns:["sensitive","redness"],volume:"80ml",rating:4.8,reviewCount:1234}),
+  p({id:"P104",brand:"Aestura",nameZh:"Atobarrier 365 神經醯胺保濕修復面霜",nameEn:"Atobarrier 365 Cream",slug:"aestura-atobarrier-cream",category:"skincare",subcategory:"cream",priceOriginal:278,priceSale:246,imageUrl:`${W}2025/12/Aestura-Atobarrier-365-Cream-80ml-Awards-Limited-Edition-30ml-Cera-Hyal-Ampoule-cover.jpg`,descriptionZh:"第二代膠囊保濕霜，乾燥敏感肌設計。",tags:["bestseller","award-winning"],skinConcerns:["sensitive","dry"],volume:"80ml",rating:4.8,reviewCount:678}),
+  p({id:"P105",brand:"COSRX",nameZh:"極致輕盈隱形涼爽防曬乳",nameEn:"Ultra Light Invisible Sunscreen",slug:"cosrx-ultra-light-sunscreen",category:"skincare",subcategory:"sunscreen",priceOriginal:128,priceSale:99,imageUrl:`${W}2024/07/cosrx-Ultra-Light-Invisible-Sunscreen-cover-1.jpg`,descriptionZh:"極致輕盈質地，保濕舒緩肌膚。",tags:["bestseller","sale"],skinConcerns:["sensitive","dry"],volume:"50ml",rating:4.7,reviewCount:823}),
+  p({id:"P106",brand:"3CE",nameZh:"Multi Eye Color Knotted Pink 眼影盤",nameEn:"Multi Eye Color Palette",slug:"3ce-multi-eye-color",category:"makeup",subcategory:"eye-brow",priceOriginal:329,priceSale:235,imageUrl:`${W}2024/11/3CE-Multi-Eye-Color-Palette-knotted-pink-cover-1.jpg`,descriptionZh:"多種顏色選擇，適合各種妝容。",tags:["bestseller"],skinConcerns:[],volume:"9色",rating:4.8,reviewCount:892}),
+  p({id:"P107",brand:"dasique",nameZh:"奶油玫瑰霧面唇釉",nameEn:"Cream De Rose Tint",slug:"dasique-cream-de-rose-tint",category:"makeup",subcategory:"lip",priceOriginal:128,priceSale:98,imageUrl:`${W}2022/11/dasique-cream-de-rose-tint-cover.jpg`,descriptionZh:"玫瑰花色基地，柔軟水潤奶油絲絨質地。",tags:["bestseller"],skinConcerns:[],volume:"8色選擇",rating:4.7,reviewCount:567}),
+  p({id:"P108",brand:"isntree",nameZh:"紫洋蔥精華爽膚水",nameEn:"Onion Newpair Essence Toner",slug:"isntree-onion-toner",category:"skincare",subcategory:"toner",priceOriginal:178,priceSale:128,imageUrl:`${W}2023/10/isntree-Onion-Newpair-Essence-Toner-cover-1.jpg`,descriptionZh:"舒緩肌膚同時提供深層保濕。",tags:["bestseller"],skinConcerns:["sensitive","pores"],volume:"200ml",rating:4.6,reviewCount:412}),
+  p({id:"P109",brand:"Abib",nameZh:"7%壬二酸X海藻淨痘減紅修護精華",nameEn:"Clear Spot Serum 7.325 Pump",slug:"abib-clear-spot-serum",category:"skincare",subcategory:"serum",priceOriginal:238,priceSale:118,imageUrl:`${W}2026/02/ABIB-Clear-Spot-Serum-7325-Pump-cover.jpg`,descriptionZh:"專為油性及暗瘡易發膚質設計嘅局部修護精華。",tags:["new","sale"],skinConcerns:["acne","oily","sensitive"],volume:"30ml",rating:4.6,reviewCount:289}),
+  p({id:"P110",brand:"Abib",nameZh:"10%煙酰胺X3%傳明酸美白精華",nameEn:"Bright Force Serum 13.0 Pump",slug:"abib-bright-force-serum",category:"skincare",subcategory:"serum",priceOriginal:238,priceSale:118,imageUrl:`${W}2025/12/ABIB-Bright-Force-Serum-13.0-Pump-cover.jpg`,descriptionZh:"色素沉澱與局部暗沉設計嘅高效精華。",tags:["new"],skinConcerns:["dark-spots","dullness"],volume:"30ml",rating:4.7,reviewCount:267}),
+  p({id:"P111",brand:"beplain",nameZh:"綠豆深清毛孔泥膜",nameEn:"Mung Bean Pore Clay Mask",slug:"beplain-mung-bean-clay-mask",category:"skincare",subcategory:"mask",priceOriginal:120,priceSale:102,imageUrl:`${W}2024/10/beplain-Mung-Bean-Pore-Clay-Mask-cover-2.jpeg`,descriptionZh:"深層清潔毛孔，肌膚光滑無瑕。",tags:["new"],skinConcerns:["pores","blackheads"],volume:"120ml",rating:4.5,reviewCount:198}),
+  p({id:"P112",brand:"Round Lab",nameZh:"白樺樹保濕爽膚棉片",nameEn:"Birch Juice Moisturizing Pad",slug:"roundlab-birch-pad",category:"skincare",subcategory:"toner",priceOriginal:188,priceSale:128,imageUrl:`${W}2024/01/round-lab-BIRCH-JUICE-MOISTURIZING-PAD-cover-1.jpg`,descriptionZh:"白樺樹保濕爽膚棉片，有效滋潤肌膚。",tags:["bestseller"],skinConcerns:["dry"],volume:"80片",rating:4.6,reviewCount:412}),
+  p({id:"P113",brand:"COSRX",nameZh:"Vitamin C23 高濃度23%維C抗氧精華",nameEn:"The Vitamin C23 Serum",slug:"cosrx-vitamin-c23",category:"skincare",subcategory:"serum",priceOriginal:128,priceSale:102,imageUrl:`${W}2024/01/COSRX-The-Vitamin-C23-Serum-cover-1.jpg`,descriptionZh:"23%維C，提亮膚色改善皺紋。",tags:["bestseller"],skinConcerns:["dullness","wrinkles"],volume:"20ml",rating:4.7,reviewCount:1023}),
+  p({id:"P114",brand:"UIQ",nameZh:"Biome Barrier 增強肌膚屏障保濕噴霧",nameEn:"Biome Barrier Cream Mist",slug:"uiq-biome-barrier-mist",category:"skincare",subcategory:"mist",priceOriginal:98,priceSale:64,imageUrl:`${W}2025/01/UIQ-Biome-Barrier-Cream-Mist-cover-1.jpeg`,descriptionZh:"24小時深層保濕，增強肌膚屏障。",tags:["new","award-winning"],skinConcerns:["sensitive","dry"],volume:"100ml",rating:4.6,reviewCount:189}),
+  p({id:"P115",brand:"ANUA",nameZh:"5%維B3+TXA美白淡斑爽膚棉片",nameEn:"Niacinamide 5 TXA Brightening Pad",slug:"anua-niacinamide-txa-pad",category:"skincare",subcategory:"toner",priceOriginal:176,priceSale:128,imageUrl:`${W}2025/08/anua-Niacinamide-5-Txa-Brightening-Pad-detail-1.png`,descriptionZh:"針對黯沉，改善色斑與黑眼圈。",tags:["new"],skinConcerns:["dark-spots","dark-circles"],volume:"60片",rating:4.7,reviewCount:312}),
+  p({id:"P116",brand:"Wellage",nameZh:"Real Hyaluronic 100%純透明質酸保濕精華面膜",nameEn:"Real Hyaluronic Ampoule Mask",slug:"wellage-hyaluronic-ampoule-mask",category:"skincare",subcategory:"mask",priceOriginal:89,priceSale:10,imageUrl:`${W}2023/11/Wellage-Real-Hyaluronic-Ampoule-Mask-cover-1.jpg`,descriptionZh:"100%純透明質酸，有效保濕肌膚。",tags:["sale","bestseller"],skinConcerns:["dry"],volume:"10片",rating:4.7,reviewCount:889}),
+  p({id:"P117",brand:"peripera",nameZh:"Night Peri Friends Ink Mood 水亮潤唇膏",nameEn:"Ink Mood Glowy Balm",slug:"peripera-ink-mood-glowy-balm",category:"makeup",subcategory:"lip",priceOriginal:58,priceSale:null,imageUrl:`${W}2024/03/peripera-Night-Peri-Friends-Ink-Mood-Glowy-Balm-cover-1.jpg`,descriptionZh:"水亮潤唇膏，三種顏色選擇。",tags:["new"],skinConcerns:[],volume:"3色選擇",rating:4.5,reviewCount:223}),
+  p({id:"P118",brand:"Etude House",nameZh:"持久控油輕盈定妝蜜粉",nameEn:"Sebum Soak Powder",slug:"etude-sebum-soak-powder",category:"makeup",subcategory:"face",priceOriginal:86,priceSale:54,imageUrl:`${W}2025/09/ET.Sebum-soak-Powder-5g-cover.jpg`,descriptionZh:"無瑕啞光妝容，持久控油。",tags:["sale"],skinConcerns:["oily"],volume:"5g",rating:4.5,reviewCount:198}),
+  p({id:"P119",brand:"ONE THING",nameZh:"5重積雪草維B5修復屏障鎮靜精華液",nameEn:"Cica B5 Serum",slug:"one-thing-cica-b5-serum",category:"skincare",subcategory:"serum",priceOriginal:208,priceSale:139,imageUrl:`${W}2024/12/One-Thing-Cica-B5-Serum-cover-1.jpg`,descriptionZh:"修復強化受損肌膚，鎮靜舒緩。",tags:["bestseller"],skinConcerns:["sensitive","redness"],volume:"50ml",rating:4.7,reviewCount:567}),
+  p({id:"P120",brand:"V&A",nameZh:"抗氧水亮保濕噴霧",nameEn:"Antioxidant Radiance Mist",slug:"va-antioxidant-mist",category:"skincare",subcategory:"mist",priceOriginal:228,priceSale:139,imageUrl:`${W}2024/07/va-Antioxidant-Radiance-Mist-cover-1.jpg`,descriptionZh:"雙效抗氧保濕配方，水潤有光澤。",tags:["new"],skinConcerns:["dry","dullness"],volume:"100ml",rating:4.6,reviewCount:289}),
+  p({id:"P121",brand:"BRING GREEN",nameZh:"90% 新鮮天然純素面膜",nameEn:"90% Fresh Mask",slug:"bringgreen-90-fresh-mask",category:"skincare",subcategory:"mask",priceOriginal:64,priceSale:null,imageUrl:`${W}2023/02/bring-green-24AD-Fresh-Mask-cover-1.jpg`,descriptionZh:"多種天然成分，適合各種肌膚。",tags:["vegan"],skinConcerns:["dry","sensitive"],volume:"10片",rating:4.4,reviewCount:178}),
+  p({id:"P122",brand:"ONE THING",nameZh:"魚腥草淨膚潔面乳",nameEn:"Houttuynia Cordata Cleanser",slug:"one-thing-heartleaf-cleanser",category:"skincare",subcategory:"cleanser",priceOriginal:148,priceSale:96,imageUrl:`${W}2023/09/one-thing-Houttuynia-Cordata-Clarifying-Facial-Cleanser-cover-1.jpg`,descriptionZh:"有效清潔肌膚，去除雜質。",tags:["bestseller"],skinConcerns:["oily","acne","sensitive"],volume:"150ml",rating:4.6,reviewCount:412}),
+  p({id:"P123",brand:"AMUSE",nameZh:"Beige Tone Up 365天提亮純素有色防曬",nameEn:"Beige Tone Up 365 Vegan Sunscreen",slug:"amuse-beige-tone-up-sunscreen",category:"skincare",subcategory:"sunscreen",priceOriginal:188,priceSale:118,imageUrl:`${W}2024/05/AMUSE-Beige-Tone-Up-365-Vegan-Sunscreen-cover-1.jpg`,descriptionZh:"SPF50+ 純素配方，提亮膚色。",tags:["bestseller","vegan"],skinConcerns:["dullness"],volume:"40ml",rating:4.7,reviewCount:445}),
+  p({id:"P124",brand:"HEVE BLUE",nameZh:"三文魚子PDRN積雪草舒緩保濕鎖水面霜",nameEn:"Salmon Caring Centella Cream",slug:"heveblue-salmon-centella-cream",category:"skincare",subcategory:"cream",priceOriginal:268,priceSale:108,imageUrl:`${W}2024/03/heveblue-salmon-caring-centella-cream-cover-1.jpg`,descriptionZh:"62%積雪草萃取，舒緩保濕肌膚。",tags:["sale"],skinConcerns:["sensitive","redness"],volume:"100ml",rating:4.6,reviewCount:312}),
+  p({id:"P125",brand:"Goodal",nameZh:"紫胡蘿蔔A醇緊緻面霜",nameEn:"Black Carrot Vita-A Retinol Firming Cream",slug:"goodal-black-carrot-cream",category:"skincare",subcategory:"cream",priceOriginal:268,priceSale:138,imageUrl:`${W}2024/08/Goodal-Black-Carrot-Vita-A-Retinol-Firming-Cream-cover-1.jpeg`,descriptionZh:"有效抗老化，早晚使用緊緻肌膚。",tags:["bestseller","anti-aging"],skinConcerns:["wrinkles","elasticity"],volume:"50ml",rating:4.7,reviewCount:567}),
+  p({id:"P126",brand:"BBIA",nameZh:"Over Glaze 糖漿蜜光豐盈感唇蜜",nameEn:"Over Glaze Lip Gloss",slug:"bbia-over-glaze",category:"makeup",subcategory:"lip",priceOriginal:128,priceSale:89,imageUrl:`${W}2026/03/BBIA-Over-Glaze-cover-1.jpg`,descriptionZh:"蘋果系列，果汁般清爽透明唇感。",tags:["new"],skinConcerns:[],volume:"4.5g",rating:4.6,reviewCount:289}),
+  p({id:"P127",brand:"peripera",nameZh:"Ink Glasting 持久亮澤唇蜜",nameEn:"Ink Glasting Lip Gloss",slug:"peripera-ink-glasting",category:"makeup",subcategory:"lip",priceOriginal:39,priceSale:null,imageUrl:`${W}2026/04/peripera-ink-glasting-lip-gloss-detail-3.jpg`,descriptionZh:"閃耀光澤，雙唇晶亮立體感。",tags:["new"],skinConcerns:[],volume:"9色選擇",rating:4.5,reviewCount:189}),
+  p({id:"P128",brand:"BBIA",nameZh:"Glow Tint Mini 水光唇釉迷你版",nameEn:"Glow Tint Mini",slug:"bbia-glow-tint-mini",category:"makeup",subcategory:"lip",priceOriginal:59,priceSale:40,imageUrl:`${W}2026/02/BBIA-GLOW-TINT-MINI-00-ROSY-cover.jpg`,descriptionZh:"暈染感同自然光澤，方便補妝。",tags:["bestseller","sale"],skinConcerns:[],volume:"1.2g",rating:4.6,reviewCount:267}),
+  p({id:"P129",brand:"dasique",nameZh:"Sweet Heart 甜心胭脂盤",nameEn:"Sweet Heart Blending Mood Cheek",slug:"dasique-sweet-heart-cheek",category:"makeup",subcategory:"face",priceOriginal:198,priceSale:148,imageUrl:`${W}2024/10/dasique-sweet-heart-Blending-Mood-Cheek-cover-1.jpg`,descriptionZh:"兩種色調選擇，適合各種妝容。",tags:["new"],skinConcerns:[],volume:"2色調",rating:4.7,reviewCount:223}),
+  p({id:"P130",brand:"Some By Mi",nameZh:"AHA-BHA-PHA 30天奇蹟修復爽膚棉片",nameEn:"AHA BHA PHA 30 Days Miracle Pad",slug:"somebymi-aha-bha-pha-pad",category:"skincare",subcategory:"toner",priceOriginal:256,priceSale:138,imageUrl:`${W}2022/01/somebymi-clear-pad-1.jpg`,descriptionZh:"AHA-BHA-PHA茶樹三酸，問題痘痘肌打造。",tags:["bestseller","sale"],skinConcerns:["acne","pores"],volume:"70片",rating:4.7,reviewCount:1234}),
+  p({id:"P131",brand:"ma:nyo",nameZh:"Bioxyl 頭皮髮根防脫髮護髮素",nameEn:"Bioxyl Anti-Hair Loss Treatment",slug:"manyo-bioxyl-treatment",category:"body-hair",subcategory:"hair-care",priceOriginal:218,priceSale:148,imageUrl:`${W}2023/02/manyo-Bioxyl-Anti-Hair-Loss-Treatment-cover-2.jpg`,descriptionZh:"高評價防脫髮護髮素，改善頭皮健康。",tags:["bestseller"],skinConcerns:[],volume:"200ml",rating:4.7,reviewCount:445}),
+  p({id:"P132",brand:"Centellian24",nameZh:"水光彈力積雪草修復淡瑕面霜",nameEn:"Madeca Cream Time Reverse",slug:"centellian24-madeca-cream",category:"skincare",subcategory:"cream",priceOriginal:69,priceSale:null,imageUrl:`${W}2026/04/centellian24-Madeca-Cream-Time-Reverse-cover-1.jpg`,descriptionZh:"水光彈力修復雙效，提升肌膚彈性。",tags:["new"],skinConcerns:["fine-lines","sensitive"],volume:"50ml",rating:4.5,reviewCount:178}),
+  p({id:"P133",brand:"isntree",nameZh:"綠茶清新精華液",nameEn:"Green Tea Fresh Serum",slug:"isntree-green-tea-serum",category:"skincare",subcategory:"serum",priceOriginal:198,priceSale:148,imageUrl:`${W}2023/10/isntree-Green-Tea-Fresh-Serum-cover-1.jpg`,descriptionZh:"濟州島天然綠茶萃取，清新水潤。",tags:["bestseller"],skinConcerns:["oily","dry"],volume:"50ml",rating:4.6,reviewCount:567}),
+  p({id:"P134",brand:"DEWYCEL",nameZh:"7 Lifting 果凍3D提拉緊緻減齡面膜",nameEn:"7 Lifting Mask",slug:"dewycel-7-lifting-mask",category:"skincare",subcategory:"mask",priceOriginal:149,priceSale:42,imageUrl:`${W}2023/01/dewt-7-lifting-mask-cover.jpg`,descriptionZh:"院線減紋減齡面膜，對抗顯老皺紋。",tags:["sale","anti-aging"],skinConcerns:["wrinkles","elasticity"],volume:"4片",rating:4.6,reviewCount:312}),
+  p({id:"P135",brand:"ColourPop",nameZh:"Big Poppy 9色日落眼影盤",nameEn:"Big Poppy 9-Color Eyeshadow",slug:"colourpop-big-poppy",category:"makeup",subcategory:"eye-brow",priceOriginal:138,priceSale:null,imageUrl:`${W}2021/09/colourpop-big-poppy.jpg`,descriptionZh:"陽光活力感全啞光眼影盤。",tags:["bestseller","vegan"],skinConcerns:[],volume:"9色",rating:4.6,reviewCount:289}),
+  p({id:"P136",brand:"ColourPop",nameZh:"Uh-Huh Honey 9色蜂蜜暖黃眼影盤",nameEn:"Uh-Huh Honey 9-Color Eyeshadow",slug:"colourpop-uh-huh-honey",category:"makeup",subcategory:"eye-brow",priceOriginal:138,priceSale:124,imageUrl:`${W}Uh-huh-Honey-1.jpg`,descriptionZh:"5啞光4金屬色調，粉質細滑顯色。",tags:["bestseller"],skinConcerns:[],volume:"9色",rating:4.7,reviewCount:412}),
+  p({id:"P137",brand:"ColourPop",nameZh:"Lucky Penny 9色銅棕眼影盤",nameEn:"Lucky Penny 9-Color Eyeshadow",slug:"colourpop-lucky-penny",category:"makeup",subcategory:"eye-brow",priceOriginal:138,priceSale:null,imageUrl:`${W}2021/11/colourpop-lucy-penny-cover.jpg`,descriptionZh:"裸色焦糖紅栗金香檳色，啞光金屬混搭。",tags:["bestseller"],skinConcerns:[],volume:"9色",rating:4.6,reviewCount:267}),
+  p({id:"P138",brand:"ColourPop",nameZh:"Free To Be 4色暖調全啞光眼影盤",nameEn:"Free To Be 4-Color Eyeshadow",slug:"colourpop-free-to-be",category:"makeup",subcategory:"eye-brow",priceOriginal:98,priceSale:89,imageUrl:`${W}2021/09/free-to-be-5.jpg`,descriptionZh:"乳脂狀易於混合暈染，天鵝絨質地。",tags:["sale"],skinConcerns:[],volume:"4色",rating:4.5,reviewCount:198}),
+  p({id:"P139",brand:"rom&nd",nameZh:"零感絲絨霧面唇釉 海灘貝殼系列",nameEn:"Zero Velvet Tint #Shell Beach",slug:"romand-zero-velvet-shell",category:"makeup",subcategory:"lip",priceOriginal:48,priceSale:null,imageUrl:`${W}2021/08/romand-Zero-Velvet-Tint-16-17-cover.jpg`,descriptionZh:"持久霧面效果，雙唇柔滑自然。",tags:["bestseller"],skinConcerns:[],volume:"4g",rating:4.7,reviewCount:678}),
+  p({id:"P140",brand:"Mude",nameZh:"Flutter 單色霧面胭脂",nameEn:"Flutter Blusher",slug:"mude-flutter-blusher",category:"makeup",subcategory:"face",priceOriginal:49,priceSale:null,imageUrl:`${W}2022/07/mude-flutter-blusher-cover-1.jpg`,descriptionZh:"6色選擇，齊膨脹色同修飾色。",tags:["sale"],skinConcerns:[],volume:"6色選擇",rating:4.5,reviewCount:312}),
+  p({id:"P141",brand:"AMUSE",nameZh:"Dew Tint 水光純素花瓣露水唇釉迷你套裝",nameEn:"Dew Tint Mini Duo",slug:"amuse-dew-tint-mini-duo",category:"makeup",subcategory:"lip",priceOriginal:189,priceSale:116,imageUrl:`${W}2025/08/AMUSE-Dew-Tint-Mini-Duo-cover-2.jpg`,descriptionZh:"輕鬆打造水潤透明光澤雙唇。",tags:["new","vegan"],skinConcerns:[],volume:"1.5g x 2",rating:4.6,reviewCount:223}),
+  p({id:"P142",brand:"Heart Percent",nameZh:"Dote on Mood 多功能唇筆",nameEn:"Dote on Mood Pure Mood Lip Pencil",slug:"heartpercent-dote-lip-pencil",category:"makeup",subcategory:"lip",priceOriginal:38,priceSale:null,imageUrl:`${W}2024/09/HEART-PERCENT.Lip-Pencil-Special-Set-cover-3.webp`,descriptionZh:"韓國No.1 YouTuber推介，多功能打底修飾。",tags:["bestseller"],skinConcerns:[],volume:"0.8g",rating:4.6,reviewCount:189}),
+  p({id:"P143",brand:"Abib",nameZh:"Collagen 復活草啫喱眼膜",nameEn:"Collagen Eye Patch Jericho Rose Jelly",slug:"abib-collagen-eye-patch",category:"skincare",subcategory:"eye-care",priceOriginal:178,priceSale:106,imageUrl:`${W}2023/08/ABIB-Collagen-Eye-Patch-Jericho-Rose-Jelly-cover-1.jpg`,descriptionZh:"植物性膠原蛋白啫喱眼膜，清爽不黏笠。",tags:["bestseller"],skinConcerns:["dark-circles","fine-lines"],volume:"90g",rating:4.7,reviewCount:567}),
+  p({id:"P144",brand:"VT",nameZh:"300 Reedle Shot 微針300導入精華",nameEn:"300 Reedle Shot",slug:"vt-300-reedle-shot",category:"skincare",subcategory:"serum",priceOriginal:109,priceSale:84,imageUrl:`${W}2024/08/vt-reedle-shot-300-10ea-cover-1.jpg`,descriptionZh:"100針加強版，效力更強同時刺刺感更強。",tags:["bestseller"],skinConcerns:["pores"],volume:"2ml x 10",rating:4.7,reviewCount:734}),
+  p({id:"P145",brand:"rom&nd",nameZh:"X WONHEE Glasting Color Gloss 奶裸糖漿唇蜜",nameEn:"X WONHEE Glasting Color Gloss",slug:"romand-wonhee-color-gloss",category:"makeup",subcategory:"lip",priceOriginal:96,priceSale:68,imageUrl:`${W}2026/04/romand-X-WONHEE-Glasting-Color-Gloss-cover-1.jpg`,descriptionZh:"奶霜般柔潤光感，多款裸色選擇。",tags:["new"],skinConcerns:[],volume:"6色選擇",rating:4.6,reviewCount:178}),
+  p({id:"P146",brand:"ANUA",nameZh:"Heartleaf 雙重卸妝套裝",nameEn:"Heartleaf Double Cleansing Set",slug:"anua-heartleaf-cleansing-set",category:"skincare",subcategory:"cleanser",priceOriginal:286,priceSale:172,imageUrl:`${W}2022/05/anua-double-cleansing-set.jpg`,descriptionZh:"卸妝油+潔面乳組合，毛孔粗糙肌洗走暗粒。",tags:["bestseller"],skinConcerns:["pores","blackheads"],volume:"200ml + 150ml",rating:4.8,reviewCount:892}),
+  p({id:"P147",brand:"WakeMake",nameZh:"自然斜角雙頭眉筆",nameEn:"Natural Hard Brow Pencil",slug:"wakemake-natural-brow-pencil",category:"makeup",subcategory:"eye-brow",priceOriginal:64,priceSale:null,imageUrl:`${W}2026/01/wakemake-Natural-Hard-Brow-Pencil-Refill-Set01-Dark-Brown-cover.jpg`,descriptionZh:"貼合眉型，描繪細緻自然層次眉妝。",tags:["new"],skinConcerns:[],volume:"5色選擇",rating:4.5,reviewCount:189}),
+  p({id:"P148",brand:"Medi-Peel",nameZh:"Daiso x 積雪草冰涼舒緩雪糕軟膜",nameEn:"Cica Cooling Soothing Ice Cream Pack",slug:"medipeel-cica-ice-cream",category:"skincare",subcategory:"mask",priceOriginal:36,priceSale:null,imageUrl:`${W}2025/07/Daiso-x-Medi-Peel-Cica-Cooling-Soothing-Ice-Cream-Modeling-Pack_1065043-cover.avif`,descriptionZh:"冰淇淋質地，清爽鎮靜敷臉新體驗。",tags:["new"],skinConcerns:["sensitive","redness"],volume:"60g + 6g",rating:4.4,reviewCount:156}),
+  p({id:"P149",brand:"The Saem",nameZh:"Cover Perfection Allproof 防水遮瑕膏",nameEn:"Cover Perfection Allproof Tip Concealer",slug:"thesaem-allproof-concealer",category:"makeup",subcategory:"face",priceOriginal:96,priceSale:68,imageUrl:`${W}2023/11/the-saem-all-proof-tip-concealer-cover-1.jpg`,descriptionZh:"持久遮瑕效果，適合各種膚色。",tags:["bestseller"],skinConcerns:["dark-circles","dullness"],volume:"2色選擇",rating:4.6,reviewCount:412}),
+  p({id:"P150",brand:"Round Lab",nameZh:"山茶花深層膠原蛋白彈力面膜",nameEn:"Camellia Deep Collagen Firming Mask",slug:"roundlab-camellia-collagen-mask",category:"skincare",subcategory:"mask",priceOriginal:32,priceSale:null,imageUrl:`${W}2025/06/Round-Lab-Camellia-Deep-Collagen-Firming-Gel-Mask-cover-1.jpg`,descriptionZh:"專為追求肌膚彈力與緊緻設計。",tags:["new"],skinConcerns:["elasticity","wrinkles"],volume:"34g/pc",rating:4.5,reviewCount:189}),
+  p({id:"P151",brand:"numbuzin",nameZh:"No.1 泛酸B5活性控油舒緩精華",nameEn:"No.1 Pantothenic B5 Active Soothing Serum",slug:"numbuzin-no1-pantothenic-serum",category:"skincare",subcategory:"serum",priceOriginal:218,priceSale:148,imageUrl:`${W}2024/07/numbuzin-No.1-Pantothenic-B5-Active-Soothing-Serum-cover-1.jpg`,descriptionZh:"7秒超保濕，4週解決皮脂問題。",tags:["bestseller"],skinConcerns:["oily","acne"],volume:"50ml",rating:4.7,reviewCount:567}),
+  p({id:"P152",brand:"Etude House",nameZh:"Heart Flutter 乾燥草莓心心胭脂",nameEn:"Heart Flutter Blusher",slug:"etude-heart-flutter-blusher",category:"makeup",subcategory:"face",priceOriginal:100,priceSale:78,imageUrl:`${W}2023/12/etude-Heart-Flutte-Blusher-Pink-Archive-cover-1-2.jpg`,descriptionZh:"乾燥草莓靈感，色澤柔和日常妝容。",tags:["sale"],skinConcerns:[],volume:"7g",rating:4.6,reviewCount:312}),
+  p({id:"P153",brand:"BY MAENG",nameZh:"BLACKPINK化妝師專業眼影掃 #06",nameEn:"#06 Base Eye Shadow Brush",slug:"bymaeng-eye-shadow-brush",category:"tools",subcategory:"brushes",priceOriginal:128,priceSale:106,imageUrl:`${W}2023/02/sooador-by-maeng-06-cover.jpg`,descriptionZh:"BLACKPINK御用化妝師品牌，專業眼影掃。",tags:["bestseller"],skinConcerns:[],volume:"",rating:4.7,reviewCount:198}),
+  p({id:"P154",brand:"Fillimilli",nameZh:"大號扇型修容掃 851",nameEn:"Big Fan Brush 851",slug:"fillimilli-big-fan-brush",category:"tools",subcategory:"brushes",priceOriginal:138,priceSale:86,imageUrl:`${W}2022/04/fillimilli-big-fan-brush-851-cover.jpg`,descriptionZh:"大號扇型修容掃，掃粉自然妝容。",tags:["sale"],skinConcerns:[],volume:"",rating:4.5,reviewCount:267}),
 ];
 
 export const featuredProducts = allProducts.filter(
