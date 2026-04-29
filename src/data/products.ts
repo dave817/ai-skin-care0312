@@ -143,10 +143,12 @@ function p(
   };
 }
 
-/* OliveYoung Korean long-description image URLs (scraped 2026-04-29).
+/* OliveYoung Korean long-description image URLs (scraped 2026-04-29 via Firecrawl MCP).
    Run each through /admin/translate or /api/translate-image to generate
-   descriptionImagesZh, then add the results below. */
-const ANUA_HEARTLEAF_77_KR_IMAGES = [
+   descriptionImagesZh PNGs, then add the URLs to the matching product.
+   Source: https://www.oliveyoung.co.kr */
+
+const KR_IMG_P001_ANUA_HEARTLEAF_77 = [
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop2/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_1.png?created=202602261517",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop3/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_2.png?created=202602261517",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop0/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_3.png?created=202602261517",
@@ -157,7 +159,7 @@ const ANUA_HEARTLEAF_77_KR_IMAGES = [
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000243621/202602261516/crop1/www.anua.kr/anua/dp/A_01_heartleaf/01_toner/250ml/260106/toner_9.png?created=202602261517",
 ];
 
-const TORRIDEN_DIVE_IN_TONER_KR_IMAGES = [
+const KR_IMG_P002_TORRIDEN_DIVE_IN = [
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/01.jpg?created=202601112304",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/03-1.jpg?created=202601112304",
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/04.jpg?created=202601112304",
@@ -169,16 +171,84 @@ const TORRIDEN_DIVE_IN_TONER_KR_IMAGES = [
   "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000170266/202601112304/crop0/torriden.jpg1.kr/torriden/product/DI/toner/18.jpg?created=202601112304",
 ];
 
+const KR_IMG_P006_WELLAGE_BLUE_AMPOULE = [
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000231885/202604171442/crop0/www.wellage.co.kr/detail/OY_ha_ample/251118_02.jpg?created=202604171442",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000231885/202604171442/crop0/www.wellage.co.kr/detail/ha_ample_100_06_02.jpg?created=202604171442",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000231885/202604171442/crop0/www.wellage.co.kr/detail/ha_ample_100_09_01.jpg?created=202604171442",
+];
+
+const KR_IMG_P010_ANUA_QUERCETINOL = [
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000222790/202602261516/crop0/www.anua.kr/anua/dp/A_01_heartleaf/07_qctn_foam/250709/qctn_Foam_1.jpg?created=202602261519",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000222790/202602261516/crop1/www.anua.kr/anua/dp/A_01_heartleaf/07_qctn_foam/250709/qctn_Foam_1.jpg?created=202602261519",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000222790/202602261516/crop0/www.anua.kr/anua/dp/A_01_heartleaf/ingredient/heartleaf_tm_1.jpg?created=202602261519",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000222790/202602261516/crop1/www.anua.kr/anua/dp/A_01_heartleaf/ingredient/heartleaf_tm_1.jpg?created=202602261519",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000222790/202602261516/crop0/www.anua.kr/anua/dp/A_01_heartleaf/07_qctn_foam/250709/qctn_Foam_5.jpg?created=202602261519",
+];
+
+const KR_IMG_P012_SUNGBOON_DEEP_COLLAGEN = [
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000210971/202604091132/crop0/sungboon.com/sungboon/oliveyoung/deep_collagen/deep_collagen/02.jpg?created=202604101154",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000210971/202604091132/crop0/sungboon.com/sungboon/oliveyoung/deep_collagen/deep_collagen/03.png?created=202604101154",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000210971/202604091132/crop0/sungboon.com/sungboon/oliveyoung/deep_collagen/deep_collagen/04.jpg?created=202604101154",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000210971/202604091132/crop0/sungboon.com/sungboon/oliveyoung/deep_collagen/deep_collagen/05.jpg?created=202604101154",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000210971/202604091132/crop0/sungboon.com/sungboon/oliveyoung/deep_collagen/deep_collagen/07.jpg?created=202604101154",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000210971/202604091132/crop0/sungboon.com/sungboon/oliveyoung/deep_collagen/deep_collagen/08.jpg?created=202604101154",
+];
+
+const KR_IMG_P013_CKD_RETINO_COLLAGEN = [
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000180075/202603142223/crop0/gi.esmplus.com/ckdhcbeau1/Product_Page_2024/CKD/RETINO_COLLAGEN/guasha_neck_cream_202603/01.jpg?created=202603142228",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000180075/202603142223/crop0/gi.esmplus.com/ckdhcbeau1/Product_Page_2024/CKD/RETINO_COLLAGEN/guasha_neck_cream_202603/03.jpg?created=202603142228",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000180075/202603142223/crop0/gi.esmplus.com/ckdhcbeau1/Product_Page_2024/CKD/RETINO_COLLAGEN/guasha_neck_cream_202603/05.jpg?created=202603142228",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000180075/202603142223/crop0/gi.esmplus.com/ckdhcbeau1/Product_Page_2024/CKD/RETINO_COLLAGEN/guasha_neck_cream_202603/07.jpg?created=202603142228",
+];
+
+const KR_IMG_P017_ABOUT_TONE_SUN_BASE = [
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000235163/202604201814/crop0/abouttone.ivyro.net/product/abt_sunserumbase_2000_01.jpg?created=202604201815",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000235163/202604201814/crop0/abouttone.ivyro.net/product/abt_sunserumbase_2000_02.jpg?created=202604201815",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000235163/202604201814/crop0/abouttone.ivyro.net/product/abt_sunserumbase_2000_03.jpg?created=202604201815",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000235163/202604201814/crop0/abouttone.ivyro.net/product/abt_sunserumbase_2000_04.jpg?created=202604201815",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000235163/202604201814/crop0/abouttone.ivyro.net/product/abt_sunserumbase_2000_05.jpg?created=202604201815",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000235163/202604201814/crop0/abouttone.ivyro.net/product/abt_sunserumbase_2000_06.jpg?created=202604201815",
+];
+
+const KR_IMG_P019_SUNGBOON_GREEN_TOMATO = [
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/260115/02_1.jpg?created=202604091138",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/251017/03_0.jpg?created=202604091138",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/260115/04.jpg?created=202604091138",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/260115/06.jpg?created=202604091138",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/260115/08.jpg?created=202604091138",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/260115/09_1.jpg?created=202604091138",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/260115/10.jpg?created=202604091138",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/260115/11_2.jpg?created=202604091138",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000229522/202604091129/crop0/sungboon.com/sungboon/page/_re/greentomato_NMN_ampoule/260115/14.jpg?created=202604091138",
+];
+
+const KR_IMG_P022_ESPOIR_BE_VELVET = [
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000184222/202604291706/crop0/espoir.xcache.kinxcdn.com/product/makeup/face/bevelvet/25AD/Winter/01.jpg?created=202604291706",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000184222/202604291706/crop0/espoir.xcache.kinxcdn.com/product/makeup/face/bevelvet/25AD/Winter/02.jpg?created=202604291706",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000184222/202604291706/crop0/espoir.xcache.kinxcdn.com/product/makeup/face/bevelvet/25AD/Winter/03.jpg?created=202604291706",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000184222/202604291706/crop0/espoir.xcache.kinxcdn.com/product/makeup/face/bevelvet/25AD/Winter/04.jpg?created=202604291706",
+];
+
+const KR_IMG_P024_ESPOIR_WATER_SPLASH = [
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000179353/202604132122/crop0/espoir.xcache.kinxcdn.com/product/makeup/sun/watersplash/sunsera/sunsera_01_re.jpg?created=202604132122",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000179353/202604132122/crop0/espoir.xcache.kinxcdn.com/product/makeup/sun/watersplash/sunsera/sunsera_03_oy.jpg?created=202604132122",
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000179353/202604132122/crop0/espoir.xcache.kinxcdn.com/product/makeup/sun/watersplash/sunsera/sunsera_04_oy_sun_lineup.jpg?created=202604132122",
+];
+
+const KR_IMG_P034_ONE_THING_NIACINAMIDE = [
+  "https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/crop/A000000158322/202507281138/crop0/image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/html/attached/2025/04/09/c24_09144119.jpg?created=202511131316",
+];
+
 export const allProducts: Product[] = [
   p("P001", "ANUA", "魚腥草X維B3鋅舒緩減紅抗痘修護精華", "Heartleaf 77 + B3Zinc Soothing Serum", "anua-heartleaf-77-b3zinc-soothing-serum", "skincare", "serum", 168, null,
     "https://www.ohmyglow.co/wp-content/uploads/2026/04/OYOTANUAHeartleaf-77-B3-Zinc-Trouble-Serum-30ml-Double-Set-cover.png",
     "ANUA 77 魚腥草精華升級配方，針對反覆出現嘅問題肌打造嘅舒緩精華。以核心魚腥草系列強化配方，搭配獨家 99,100ppm B3 Zinc™ 複合物，提升精華滲透同鎮靜效果。",
-    ["new", "bestseller"], ["acne", "redness", "sensitive"], "30ml", 4.8, 312, 50, ANUA_HEARTLEAF_77_KR_IMAGES),
+    ["new", "bestseller"], ["acne", "redness", "sensitive"], "30ml", 4.8, 312, 50, KR_IMG_P001_ANUA_HEARTLEAF_77),
 
   p("P002", "Torriden", "DIVE-IN 低分子透明質酸爽膚棉片", "DIVE-IN Low Molecule Hyaluronic Acid Multi Pad", "torriden-dive-in-multi-pad", "skincare", "toner", 188, 118,
     "https://www.ohmyglow.co/wp-content/uploads/2022/05/TORRIDEN.DIVE-IN-Low-Molecule-Hyaluronic-Acid-Multi-Pad-cover-new-1.jpg",
     "Torriden Dive-In 低分子透明質酸爽膚棉片，快速補水鎮靜，收縮毛孔。3秒內極速補水，薄薄棉片牢牢緊貼肌膚，所有膚質適用。",
-    ["bestseller", "sale"], ["dry", "sensitive"], "80片", 4.9, 1842, 50, TORRIDEN_DIVE_IN_TONER_KR_IMAGES),
+    ["bestseller", "sale"], ["dry", "sensitive"], "80片", 4.9, 1842, 50, KR_IMG_P002_TORRIDEN_DIVE_IN),
 
   p("P003", "Round Lab", "專利複合維他命維B3美白淡斑精華", "Vita Niacinamide Dark Spot Serum", "round-lab-vita-niacinamide-serum", "skincare", "serum", 218, 138,
     "https://www.ohmyglow.co/wp-content/uploads/2025/05/ROUND-LAB-VITA-NIACINAMIDE-DARK-SPOT-SERUM-30ml-cover.jpg",
@@ -198,7 +268,7 @@ export const allProducts: Product[] = [
   p("P006", "Wellage", "Real Hyaluronic Blue Ampoule 100% 純透明質酸保濕精華", "Real Hyaluronic Blue Ampoule", "wellage-real-hyaluronic-blue-ampoule", "skincare", "serum", 168, 118,
     "https://www.ohmyglow.co/wp-content/uploads/2023/11/Wellage-Real-Hyaluronic-Blue-Ampoule-cover-1.jpg",
     "2025全年度 GlowPick Award 最佳保濕精華第一名。水狀質地不黏稠易吸收，主打 100% 純透明質酸，由內到外飲飽水。",
-    ["bestseller", "award-winning"], ["dry", "sensitive"], "60ml", 4.9, 2103),
+    ["bestseller", "award-winning"], ["dry", "sensitive"], "60ml", 4.9, 2103, 50, KR_IMG_P006_WELLAGE_BLUE_AMPOULE),
 
   p("P007", "isntree", "極低分子透明質酸保濕精華", "Ultra-Low Molecular Hyaluronic Acid Serum", "isntree-ultra-low-ha-serum", "skincare", "serum", 168, 138,
     "https://www.ohmyglow.co/wp-content/uploads/2023/06/isntree-Ultra-Low-Molecular-Hyaluronic-Acid-Serum-cover-1.jpg",
@@ -218,7 +288,7 @@ export const allProducts: Product[] = [
   p("P010", "ANUA", "魚腥草槲皮素毛孔深清潔膚乳", "Heartleaf Quercetinol Pore Deep Cleansing Foam", "anua-heartleaf-quercetinol-cleansing", "skincare", "cleanser", 118, 89,
     "https://www.ohmyglow.co/wp-content/uploads/2023/10/anua-HEARTLEAF-QUERCETINOL-PORE-DEEP-CLEANSING-FOAM-cover-1.jpg",
     "深清毛孔，洗走黑頭暗粒油光角質。質地順滑 creamy 柔軟，加有細顆粒鮮魚腥草，輕易搓出綿密泡泡。",
-    ["bestseller"], ["pores", "oily", "blackheads"], "150ml", 4.7, 879),
+    ["bestseller"], ["pores", "oily", "blackheads"], "150ml", 4.7, 879, 50, KR_IMG_P010_ANUA_QUERCETINOL),
 
   p("P011", "DEWYTREE", "AC Deep Calming 涼感降溫積雪草深層鎮靜減紅面膜", "AC Deep Calming Mask", "dewytree-ac-deep-calming-mask", "skincare", "mask", 126, 16,
     "https://www.ohmyglow.co/wp-content/uploads/2025/08/DEWYTREE-AC-DEEP-CALMING-MASK-10EA-27g10EA-cover.jpg",
@@ -228,12 +298,12 @@ export const allProducts: Product[] = [
   p("P012", "Sungboon Editor", "深層低分子膠原＋煙醯胺維他命C 亮白果凍面膜", "Deep Collagen Niacin Vita C Brightening Mask", "sungboon-deep-collagen-mask", "skincare", "mask", 128, 38,
     "https://www.ohmyglow.co/wp-content/uploads/2026/01/Sungboon-Editor-Deep-Collagen-Niacin-Vita-C-Brightening-Mask-cover-2.jpg",
     "低分子膠原為基底嘅 hydrogel 果凍精華面膜，富含高濃度膠原同亮白活性成分，一次改善暗沉膚色與提升彈力。",
-    ["sale"], ["dark-spots", "dry", "fine-lines"], "4片裝", 4.7, 512),
+    ["sale"], ["dark-spots", "dry", "fine-lines"], "4片裝", 4.7, 512, 50, KR_IMG_P012_SUNGBOON_DEEP_COLLAGEN),
 
   p("P013", "CKD", "Retino Collagen 維A視黃醇低分子膠原蛋白提彈淡紋面霜", "Retino Collagen Small Molecule 300 Cream", "ckd-retino-collagen-cream", "skincare", "cream", 279, 138,
     "https://www.ohmyglow.co/wp-content/uploads/2025/04/CKD-Retino-Collagen-Small-Molecule-300-Cream-cover-1.jpg",
     "低分子膠原蛋白霜，吸收力強嘅彈力乳霜，有效增強皮膚彈性同淡化皺紋。小分子膠原蛋白 X 第三代維A X 脂質體膠囊三重活性。",
-    ["anti-aging"], ["wrinkles", "dry", "elasticity"], "40ml", 4.6, 367),
+    ["anti-aging"], ["wrinkles", "dry", "elasticity"], "40ml", 4.6, 367, 50, KR_IMG_P013_CKD_RETINO_COLLAGEN),
 
   p("P014", "Torriden", "DIVE-IN 低分子透明質酸溫和低敏卸妝水", "DIVE-IN Low Molecular HA Cleansing Water", "torriden-dive-in-cleansing-water", "skincare", "cleanser", 49, null,
     "https://www.ohmyglow.co/wp-content/uploads/2022/08/torriden-dive-in-cleansing-water.jpg",
@@ -253,7 +323,7 @@ export const allProducts: Product[] = [
   p("P017", "About Tone", "Sun Serum Base 妝前防曬精華", "Sun Serum Base SPF50+ PA++++", "about-tone-sun-serum-base", "skincare", "sunscreen", 138, 79,
     "https://www.ohmyglow.co/wp-content/uploads/2025/11/About-Tone-Sun-Serum-Base-cover-1.jpg",
     "妝前防曬精華結合保濕、防曬同持妝，妝容更服貼持久。75% 水感保濕成分，輕盈水潤無黏膩感。",
-    ["new"], ["dry", "acne", "dark-spots"], "30ml", 4.7, 156),
+    ["new"], ["dry", "acne", "dark-spots"], "30ml", 4.7, 156, 50, KR_IMG_P017_ABOUT_TONE_SUN_BASE),
 
   p("P018", "CKD", "高濃度綠蜂膠 3合1 美肌提亮有色物理防曬", "Green Propolis All-covery Sun SPF50+ PA++++", "ckd-green-propolis-sun", "skincare", "sunscreen", 189, 89,
     "https://www.ohmyglow.co/wp-content/uploads/2025/01/CKD-Green-Propolis-All-covery-Sun-cover-6.jpg",
@@ -263,7 +333,7 @@ export const allProducts: Product[] = [
   p("P019", "Sungboon Editor", "Green Tomato NMN 毛孔緊緻安瓶", "Green Tomato NMN Pore Lifting Ampoule", "sungboon-green-tomato-ampoule", "skincare", "serum", 268, 128,
     "https://www.ohmyglow.co/wp-content/uploads/2026/02/Sungboon-Editor-Green-Tomato-NMN-Pore-Lifting-Ampoule-detail-3.jpg",
     "皇牌人氣安瓶累計銷量數百萬瓶，全新升級配方。專利綠番茄 X 高濃度 NMN，針對縱向、橫向、色素同下陷毛孔提供 3D 改善。",
-    ["bestseller"], ["pores", "elasticity"], "40ml", 4.8, 1567),
+    ["bestseller"], ["pores", "elasticity"], "40ml", 4.8, 1567, 50, KR_IMG_P019_SUNGBOON_GREEN_TOMATO),
 
   p("P020", "CLIO", "Sharp So Simple 極細防水眼線筆", "Sharp So Simple Waterproof Pencil Liner", "clio-sharp-so-simple-liner", "makeup", "eye-brow", 120, 68,
     "https://www.ohmyglow.co/wp-content/uploads/2024/02/clio-Sharp-So-Simple-Waterproof-Pencil-Liner-01-11-cover-1.jpg",
@@ -278,7 +348,7 @@ export const allProducts: Product[] = [
   p("P022", "Espoir", "Pro Tailor Be Velvet Cover 持久絲絨啞緻氣墊粉底", "Pro Tailor Be Velvet Cover Cushion", "espoir-pro-tailor-velvet-cushion", "makeup", "face", 168, null,
     "https://www.ohmyglow.co/wp-content/uploads/2023/07/espoir-Protailor-Be-Velvet-Cover-Cushion-New-Class-cover-1.jpg",
     "持久絲絨啞緻氣墊粉底，配方輕薄能有效遮蓋毛孔，妝容自然無瑕。",
-    ["bestseller", "vegan"], [], "13g + 13g Refill", 4.8, 1876),
+    ["bestseller", "vegan"], [], "13g + 13g Refill", 4.8, 1876, 50, KR_IMG_P022_ESPOIR_BE_VELVET),
 
   p("P023", "NAMING.", "Zero Gravity Cover Fit 零重力輕盈貼服氣墊粉底", "Zero Gravity Cover Fit Cushion SPF40 PA++", "naming-zero-gravity-cushion", "makeup", "face", 159, 104,
     "https://www.ohmyglow.co/wp-content/uploads/2024/09/naming-Zero-Gravity-Cover-Fit-Cushion-cover-1.jpg",
@@ -288,7 +358,7 @@ export const allProducts: Product[] = [
   p("P024", "Espoir", "Water Splash 爆水提亮潤色防曬乳霜", "Water Splash Sun Cream Ceramide", "espoir-water-splash-sun-cream", "skincare", "sunscreen", 168, 118,
     "https://www.ohmyglow.co/wp-content/uploads/2023/03/Espoir-Water-Splash-Sun-Cream-Ceramide-cover-1.jpg",
     "Espoir 皇牌爆水防曬霜添加 Ceramide 神經酰胺成份，加強皮膚屏障，提高保濕能力。充滿水分清爽感，肌膚水潤柔軟。",
-    ["bestseller"], ["dry"], "60ml", 4.7, 1124),
+    ["bestseller"], ["dry"], "60ml", 4.7, 1124, 50, KR_IMG_P024_ESPOIR_WATER_SPLASH),
 
   p("P025", "Glossier", "Lash Slick 皇牌纖長持久睫毛膏", "Lash Slick", "glossier-lash-slick", "makeup", "eye-brow", 175, null,
     "https://www.ohmyglow.co/wp-content/uploads/Lash-Slick-1.jpg",
@@ -338,7 +408,7 @@ export const allProducts: Product[] = [
   p("P034", "ONE THING", "Niacinamide Glutathione 5% 維B穀胱甘肽美白爽膚水", "Niacinamide Glutathione Toner 5%", "one-thing-niacinamide-toner", "skincare", "toner", 186, 138,
     "https://www.ohmyglow.co/wp-content/uploads/2025/01/One-Thing-Niacinamide-Glutathione-Toner-cover-1.jpg",
     "5% Niacinamide 均勻膚色，改善色素沉著。Glutathione 加強美白，無刺激滋潤保養。",
-    ["bestseller"], ["dark-spots", "sensitive"], "210ml", 4.7, 678),
+    ["bestseller"], ["dark-spots", "sensitive"], "210ml", 4.7, 678, 50, KR_IMG_P034_ONE_THING_NIACINAMIDE),
 
   p("P035", "numbuzin", "No.3 Radiance Glowing 酵母提亮去暗沉爽膚棉片", "No.3 Radiance Glowing Jumbo Pad", "numbuzin-no3-radiance-pad", "skincare", "toner", 198, 138,
     "https://www.ohmyglow.co/wp-content/uploads/2023/11/numbuzin-No.3-Radiance-Glowing-Jumbo-Essence-Pad-cover-1.jpg",
