@@ -45,6 +45,12 @@ export default function ProductDetailClient({
   const { addItem } = useCart();
   const [isWished, setIsWished] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [detailImageLanguage, setDetailImageLanguage] = useState<"zh" | "kr">(
+    () =>
+      product.descriptionImagesZh && product.descriptionImagesZh.length > 0
+        ? "zh"
+        : "kr",
+  );
 
   const hasDiscount = product.priceSale !== null;
   const discount = hasDiscount
@@ -190,22 +196,46 @@ export default function ProductDetailClient({
               dangerouslySetInnerHTML={{ __html: product.descriptionZh }}
             />
 
-            {/* Long detail images: prefer Chinese-translated; fall back to Korean originals */}
+            {/* Long detail images: Chinese by default, Korean originals still available */}
             {(() => {
+              const zhImages = product.descriptionImagesZh ?? [];
+              const krImages = product.descriptionImagesKr ?? [];
+              const hasZh = zhImages.length > 0;
+              const hasKr = krImages.length > 0;
+              const canToggle = hasZh && hasKr;
               const images =
-                (product.descriptionImagesZh && product.descriptionImagesZh.length > 0
-                  ? product.descriptionImagesZh
-                  : product.descriptionImagesKr) ?? [];
+                detailImageLanguage === "zh" && hasZh ? zhImages : krImages;
               if (images.length === 0) return null;
-              const isUntranslated =
-                !product.descriptionImagesZh ||
-                product.descriptionImagesZh.length === 0;
               return (
                 <div className="mt-6 space-y-2">
-                  {isUntranslated && (
-                    <div className="text-[11px] text-text-muted bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-2">
-                      ⓘ 原廠韓文詳情圖（中文翻譯版製作中 — 後台管理員可透過 /admin/translate 上載翻譯）
+                  {canToggle ? (
+                    <div className="flex items-center justify-between gap-3 rounded-xl border border-border-light bg-bg-secondary p-1">
+                      {[
+                        { value: "zh" as const, label: "繁體中文" },
+                        { value: "kr" as const, label: "韓文原圖" },
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => setDetailImageLanguage(option.value)}
+                          className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${
+                            detailImageLanguage === option.value
+                              ? "bg-white text-text-primary shadow-sm"
+                              : "text-text-muted hover:text-text-primary"
+                          }`}
+                          aria-pressed={detailImageLanguage === option.value}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
                     </div>
+                  ) : (
+                    !hasZh &&
+                    hasKr && (
+                      <div className="text-[11px] text-text-muted bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-2">
+                        原廠韓文詳情圖，繁體中文版本製作中。
+                      </div>
+                    )
                   )}
                   {images.map((src, i) => (
                     <Image
