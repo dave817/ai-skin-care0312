@@ -2,7 +2,7 @@ import { listProducts } from "@/lib/db/products-repo";
 import { listBlogs } from "@/lib/db/blogs-repo";
 import HomeClient from "./HomeClient";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const [products, blogs] = await Promise.all([listProducts(), listBlogs()]);

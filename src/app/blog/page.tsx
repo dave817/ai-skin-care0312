@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { listBlogs } from "@/lib/db/blogs-repo";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function BlogPage() {
   const blogPosts = await listBlogs();

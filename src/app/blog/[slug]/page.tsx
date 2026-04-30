@@ -4,7 +4,7 @@ import { getProduct } from "@/lib/db/products-repo";
 import type { Product } from "@/data/products";
 import BlogDetailClient from "./BlogDetailClient";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ slug: string }>;

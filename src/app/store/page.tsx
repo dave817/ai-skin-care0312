@@ -1,7 +1,7 @@
 import { listProducts } from "@/lib/db/products-repo";
 import StoreClient from "./StoreClient";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "商品目錄 | Dear Glow Beauty",
